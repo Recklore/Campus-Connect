@@ -1,0 +1,278 @@
+{
+  "info": {
+    "name": "Auth API - Login & Signup Tests",
+    "description": "Test collection for POST /auth/signup and POST /auth/login. Base URL: http://localhost:8080",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "SIGNUP",
+      "item": [
+        {
+          "name": "[201] Signup - Valid (all fields)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Aman\",\n  \"lastName\": \"Sharma\",\n  \"gender\": \"male\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"aman.sharma@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021001\",\n  \"password\": \"SecurePass1\",\n  \"isAdmin\": false,\n  \"isSenior\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "[201] Signup - Valid (no optional fields)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Priya\",\n  \"gender\": \"female\",\n  \"dob\": \"1999-11-20\",\n  \"emailId\": \"priya.patel@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2020005\",\n  \"password\": \"MyP@ssw0rd\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[201] Signup - Admin user",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\",\n  \"gender\": \"other\",\n  \"dob\": \"1985-03-10\",\n  \"emailId\": \"admin.user@curaj.ac.in\",\n  \"enrollmentId\": \"ADMIN2025001\",\n  \"password\": \"AdminPass99\",\n  \"isAdmin\": true,\n  \"isSenior\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "[409] Signup - Duplicate user (run after first signup)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Aman\",\n  \"lastName\": \"Sharma\",\n  \"gender\": \"male\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"aman.sharma@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021001\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - Missing required firstName",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastName\": \"Sharma\",\n  \"gender\": \"male\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"test.user@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021002\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - Invalid email domain (not @curaj.ac.in)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"gender\": \"male\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"test.user@gmail.com\",\n  \"enrollmentId\": \"CUR2021003\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - Invalid gender value",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"gender\": \"nonbinary\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"test.user2@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021003\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - Future date of birth",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"gender\": \"female\",\n  \"dob\": \"2099-01-01\",\n  \"emailId\": \"test.user3@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021004\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - Password too short (< 8 chars)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"gender\": \"male\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"test.user4@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021005\",\n  \"password\": \"abc\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - enrollmentId too short (< 10 chars)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"gender\": \"male\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"test.user5@curaj.ac.in\",\n  \"enrollmentId\": \"CUR202\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - firstName too short (< 2 chars)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"A\",\n  \"gender\": \"male\",\n  \"dob\": \"2000-05-15\",\n  \"emailId\": \"test.user6@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021006\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Signup - Empty body",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/signup", "host": ["{{baseUrl}}"], "path": ["auth", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "LOGIN",
+      "item": [
+        {
+          "name": "[202] Login - With emailId",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailId\": \"aman.sharma@curaj.ac.in\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[202] Login - With enrollmentId",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enrollmentId\": \"CUR2021001\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[403] Login - Wrong password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailId\": \"aman.sharma@curaj.ac.in\",\n  \"password\": \"WrongPass99\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[403] Login - Non-existent user",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailId\": \"nobody.here@curaj.ac.in\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Login - Both emailId AND enrollmentId (xor violation)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailId\": \"aman.sharma@curaj.ac.in\",\n  \"enrollmentId\": \"CUR2021001\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Login - Neither emailId nor enrollmentId (xor violation)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Login - Missing password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailId\": \"aman.sharma@curaj.ac.in\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Login - Invalid email domain",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailId\": \"aman.sharma@gmail.com\",\n  \"password\": \"SecurePass1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "[400] Login - Empty body",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
