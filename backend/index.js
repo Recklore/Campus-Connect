@@ -3,11 +3,12 @@ const cors = require("cors");
 
 require("dotenv").config();
 
-const { main } = require("./models/db");
+const { main } = require("./config/db");
+const { connectRedis } = require("./config/redis");
 const { userModel } = require("./models/user");
 const { authRouter } = require("./routes/authRouter");
 
-PORT = process.env.PORT || 8080;
+PORT = process.env.BACKEND_PORT || 8080;
 
 const app = express();
 
@@ -16,8 +17,20 @@ app.use(cors());
 
 app.use("/auth", authRouter);
 
-app.listen(PORT, async () => {
-  await main();
-  console.log("connected to database");
-  console.log(`server is running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await main();
+    console.log("connected to database");
+
+    await connectRedis();
+
+    app.listen(PORT, () => {
+      console.log(`server is running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("startup failed:", err.message);
+    process.exit(1);
+  }
+};
+
+startServer();

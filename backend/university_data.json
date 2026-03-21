@@ -1,0 +1,863 @@
+{
+  "meta": {
+    "university": "Central University of Rajasthan (CURAJ)",
+    "domain": "@curaj.ac.in",
+    "generated": "2026-03-15",
+    "totalStudents": 60,
+    "totalSeniors": 41
+  },
+  "departments": [
+    {
+      "code": "CSE",
+      "name": "Computer Science & Engineering"
+    },
+    {
+      "code": "ECE",
+      "name": "Electronics & Communication Engineering"
+    },
+    {
+      "code": "ME",
+      "name": "Mechanical Engineering"
+    },
+    {
+      "code": "CE",
+      "name": "Civil Engineering"
+    },
+    {
+      "code": "EE",
+      "name": "Electrical Engineering"
+    },
+    {
+      "code": "PHY",
+      "name": "Physics"
+    },
+    {
+      "code": "CHM",
+      "name": "Chemistry"
+    },
+    {
+      "code": "MTH",
+      "name": "Mathematics"
+    },
+    {
+      "code": "ENG",
+      "name": "English"
+    },
+    {
+      "code": "MGT",
+      "name": "Management Studies"
+    }
+  ],
+  "students": [
+    {
+      "name": "Anjali Ghosh",
+      "enrollmentNumber": "2023BTCSE004",
+      "emailId": "2023btcse004@curaj.ac.in",
+      "department": "English",
+      "dob": "2005-12-09",
+      "program": "Bachelor of Arts"
+    },
+    {
+      "name": "Parminder Bhatt",
+      "enrollmentNumber": "2022BBAMGT001",
+      "emailId": "2022bbamgt001@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2007-12-25",
+      "program": "Bachelor of Business Administration"
+    },
+    {
+      "name": "Faisal Beg",
+      "enrollmentNumber": "2022BSMTH001",
+      "emailId": "2022bsmth001@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2006-01-26",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Shifa Reddy",
+      "enrollmentNumber": "2022BTCSE001",
+      "emailId": "2022btcse001@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "dob": "2004-09-16",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Faisal Parmar",
+      "enrollmentNumber": "2022BTCSE002",
+      "emailId": "2022btcse002@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "dob": "2004-02-25",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Yusuf Ghosh",
+      "enrollmentNumber": "2022BTEE001",
+      "emailId": "2022btee001@curaj.ac.in",
+      "department": "Electrical Engineering",
+      "dob": "2008-03-14",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Rekha Dhaliwal",
+      "enrollmentNumber": "2022MBAMGT001",
+      "emailId": "2022mbamgt001@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2002-01-24",
+      "program": "Master of Business Administration"
+    },
+    {
+      "name": "Bharti Rathod",
+      "enrollmentNumber": "2022MSMTH001",
+      "emailId": "2022msmth001@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2002-09-01",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Asif Roy",
+      "enrollmentNumber": "2022MSMTH002",
+      "emailId": "2022msmth002@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2003-10-07",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Yogesh Iyer",
+      "enrollmentNumber": "2022MSMTH003",
+      "emailId": "2022msmth003@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2003-04-04",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Manoj Krishnan",
+      "enrollmentNumber": "2022MSPHY001",
+      "emailId": "2022msphy001@curaj.ac.in",
+      "department": "Physics",
+      "dob": "2004-02-22",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Shaurya Damor",
+      "enrollmentNumber": "2022MTCE001",
+      "emailId": "2022mtce001@curaj.ac.in",
+      "department": "Civil Engineering",
+      "dob": "1999-10-20",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Aditya Soni",
+      "enrollmentNumber": "2022MTCSE001",
+      "emailId": "2022mtcse001@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "dob": "2004-04-21",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Kuldeep Mirza",
+      "enrollmentNumber": "2022MTECE001",
+      "emailId": "2022mtece001@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "dob": "2001-06-05",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Nazneen Jain",
+      "enrollmentNumber": "2022MTEE001",
+      "emailId": "2022mtee001@curaj.ac.in",
+      "department": "Electrical Engineering",
+      "dob": "1999-08-09",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Geeta Choudhary",
+      "enrollmentNumber": "2023BSPHY001",
+      "emailId": "2023bsphy001@curaj.ac.in",
+      "department": "Physics",
+      "dob": "2004-01-27",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Fatima Varma",
+      "enrollmentNumber": "2023BTCSE001",
+      "emailId": "2023btcse001@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "dob": "2008-09-16",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Suresh Venkatesh",
+      "enrollmentNumber": "2023BTECE001",
+      "emailId": "2023btece001@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "dob": "2008-10-09",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Kamla Srivastava",
+      "enrollmentNumber": "2023BTECE002",
+      "emailId": "2023btece002@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "dob": "2007-03-03",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Lakshmi Dubey",
+      "enrollmentNumber": "2023BTME001",
+      "emailId": "2023btme001@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "dob": "2005-01-07",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Kavya Iyer",
+      "enrollmentNumber": "2023BTME002",
+      "emailId": "2023btme002@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "dob": "2004-12-10",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Devika Balasubramanian",
+      "enrollmentNumber": "2023BTME003",
+      "emailId": "2023btme003@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "dob": "2006-11-26",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Nadeem Parikh",
+      "enrollmentNumber": "2023MAENG001",
+      "emailId": "2023maeng001@curaj.ac.in",
+      "department": "English",
+      "dob": "2003-03-11",
+      "program": "Master of Arts"
+    },
+    {
+      "name": "Kavya Sheikh",
+      "enrollmentNumber": "2023MBAMGT001",
+      "emailId": "2023mbamgt001@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2003-11-07",
+      "program": "Master of Business Administration"
+    },
+    {
+      "name": "Ramesh Ghosh",
+      "enrollmentNumber": "2023MBAMGT002",
+      "emailId": "2023mbamgt002@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2001-05-26",
+      "program": "Master of Business Administration"
+    },
+    {
+      "name": "Asif Shah",
+      "enrollmentNumber": "2023MSPHY001",
+      "emailId": "2023msphy001@curaj.ac.in",
+      "department": "Physics",
+      "dob": "2003-12-04",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Wasim Chowdhary",
+      "enrollmentNumber": "2023MSPHY002",
+      "emailId": "2023msphy002@curaj.ac.in",
+      "department": "Physics",
+      "dob": "2001-09-25",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Dinesh Naidu",
+      "enrollmentNumber": "2023MTCE001",
+      "emailId": "2023mtce001@curaj.ac.in",
+      "department": "Civil Engineering",
+      "dob": "2000-07-15",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Esha Subramanian",
+      "enrollmentNumber": "2023MTCSE001",
+      "emailId": "2023mtcse001@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "dob": "2000-01-23",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Yogesh Trivedi",
+      "enrollmentNumber": "2023MTECE001",
+      "emailId": "2023mtece001@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "dob": "2003-10-24",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Hitesh Meena",
+      "enrollmentNumber": "2023MTME001",
+      "emailId": "2023mtme001@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "dob": "2004-12-25",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Nadeem Khan",
+      "enrollmentNumber": "2023MTME002",
+      "emailId": "2023mtme002@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "dob": "1999-09-16",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Kavya Gupta",
+      "enrollmentNumber": "2024BAENG001",
+      "emailId": "2024baeng001@curaj.ac.in",
+      "department": "English",
+      "dob": "2008-07-21",
+      "program": "Bachelor of Arts"
+    },
+    {
+      "name": "Bharti Hussain",
+      "enrollmentNumber": "2024BAENG002",
+      "emailId": "2024baeng002@curaj.ac.in",
+      "department": "English",
+      "dob": "2007-05-28",
+      "program": "Bachelor of Arts"
+    },
+    {
+      "name": "Noor Chopra",
+      "enrollmentNumber": "2024BBAMGT001",
+      "emailId": "2024bbamgt001@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2004-04-03",
+      "program": "Bachelor of Business Administration"
+    },
+    {
+      "name": "Zara Gill",
+      "enrollmentNumber": "2024BSMTH001",
+      "emailId": "2024bsmth001@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2007-03-23",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Manpreet Pillai",
+      "enrollmentNumber": "2024BSMTH002",
+      "emailId": "2024bsmth002@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2005-11-06",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Faisal Pathak",
+      "enrollmentNumber": "2024BSPHY001",
+      "emailId": "2024bsphy001@curaj.ac.in",
+      "department": "Physics",
+      "dob": "2007-03-18",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Navya Chatterjee",
+      "enrollmentNumber": "2024BSPHY002",
+      "emailId": "2024bsphy002@curaj.ac.in",
+      "department": "Physics",
+      "dob": "2008-06-02",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Yusuf Mishra",
+      "enrollmentNumber": "2024BTCE001",
+      "emailId": "2024btce001@curaj.ac.in",
+      "department": "Civil Engineering",
+      "dob": "2007-12-04",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Deepak Beg",
+      "enrollmentNumber": "2024BTCE002",
+      "emailId": "2024btce002@curaj.ac.in",
+      "department": "Civil Engineering",
+      "dob": "2003-01-25",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Asif Arora",
+      "enrollmentNumber": "2024BTCE003",
+      "emailId": "2024btce003@curaj.ac.in",
+      "department": "Civil Engineering",
+      "dob": "2007-02-11",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Shaista Prasad",
+      "enrollmentNumber": "2024BTCSE001",
+      "emailId": "2024btcse001@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "dob": "2005-06-25",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Sana Shah",
+      "enrollmentNumber": "2024MAENG001",
+      "emailId": "2024maeng001@curaj.ac.in",
+      "department": "English",
+      "dob": "2002-07-19",
+      "program": "Master of Arts"
+    },
+    {
+      "name": "Vikram Swamy",
+      "enrollmentNumber": "2024MBAMGT001",
+      "emailId": "2024mbamgt001@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2000-01-04",
+      "program": "Master of Business Administration"
+    },
+    {
+      "name": "Bharti Dhaliwal",
+      "enrollmentNumber": "2024MBAMGT002",
+      "emailId": "2024mbamgt002@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "1999-06-03",
+      "program": "Master of Business Administration"
+    },
+    {
+      "name": "Chetan Desai",
+      "enrollmentNumber": "2024MSCHM001",
+      "emailId": "2024mschm001@curaj.ac.in",
+      "department": "Chemistry",
+      "dob": "2000-05-15",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Gurjot Damor",
+      "enrollmentNumber": "2024MSMTH001",
+      "emailId": "2024msmth001@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2002-03-07",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Usha Ninama",
+      "enrollmentNumber": "2024MSPHY001",
+      "emailId": "2024msphy001@curaj.ac.in",
+      "department": "Physics",
+      "dob": "2004-04-02",
+      "program": "Master of Science"
+    },
+    {
+      "name": "Faisal Saxena",
+      "enrollmentNumber": "2025BAENG001",
+      "emailId": "2025baeng001@curaj.ac.in",
+      "department": "English",
+      "dob": "2008-04-08",
+      "program": "Bachelor of Arts"
+    },
+    {
+      "name": "Nazneen Chakraborty",
+      "enrollmentNumber": "2025BBAMGT001",
+      "emailId": "2025bbamgt001@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2007-11-25",
+      "program": "Bachelor of Business Administration"
+    },
+    {
+      "name": "Parvati Sastry",
+      "enrollmentNumber": "2025BSCHM001",
+      "emailId": "2025bschm001@curaj.ac.in",
+      "department": "Chemistry",
+      "dob": "2008-07-02",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Dinesh Gandhi",
+      "enrollmentNumber": "2025BSMTH001",
+      "emailId": "2025bsmth001@curaj.ac.in",
+      "department": "Mathematics",
+      "dob": "2003-05-25",
+      "program": "Bachelor of Science"
+    },
+    {
+      "name": "Yogesh Gill",
+      "enrollmentNumber": "2025BTCSE001",
+      "emailId": "2025btcse001@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "dob": "2003-02-18",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Hitesh Shah",
+      "enrollmentNumber": "2025BTECE001",
+      "emailId": "2025btece001@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "dob": "2008-10-07",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Rekha Patel",
+      "enrollmentNumber": "2025BTEE001",
+      "emailId": "2025btee001@curaj.ac.in",
+      "department": "Electrical Engineering",
+      "dob": "2007-09-03",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Simarjit Ali",
+      "enrollmentNumber": "2025BTEE002",
+      "emailId": "2025btee002@curaj.ac.in",
+      "department": "Electrical Engineering",
+      "dob": "2003-02-13",
+      "program": "Bachelor of Technology"
+    },
+    {
+      "name": "Harpreet Sheikh",
+      "enrollmentNumber": "2025MBAMGT001",
+      "emailId": "2025mbamgt001@curaj.ac.in",
+      "department": "Management Studies",
+      "dob": "2003-09-27",
+      "program": "Master of Business Administration"
+    },
+    {
+      "name": "Kabir Nanda",
+      "enrollmentNumber": "2025MTCE001",
+      "emailId": "2025mtce001@curaj.ac.in",
+      "department": "Civil Engineering",
+      "dob": "2004-04-01",
+      "program": "Master of Technology"
+    },
+    {
+      "name": "Balwinder Dhaliwal",
+      "enrollmentNumber": "2025MTME001",
+      "emailId": "2025mtme001@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "dob": "2000-12-02",
+      "program": "Master of Technology"
+    }
+  ],
+  "seniors": [
+    {
+      "name": "Dr. Suresh Iyer",
+      "emailId": "suresh.iyer@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0001"
+    },
+    {
+      "name": "Prof. Gaurav Bhatt",
+      "emailId": "gaurav.bhatt@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0030"
+    },
+    {
+      "name": "Dr. Zara Tiwari",
+      "emailId": "zara.tiwari@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0031"
+    },
+    {
+      "name": "Dr. Zara Das",
+      "emailId": "zara.das@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0032"
+    },
+    {
+      "name": "Dr. Saanvi Verma",
+      "emailId": "saanvi.verma@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0033"
+    },
+    {
+      "name": "Dr. Kamla Raman",
+      "emailId": "kamla.raman@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0002"
+    },
+    {
+      "name": "Dr. Ishaan Chaturvedi",
+      "emailId": "ishaan.chaturvedi@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0040"
+    },
+    {
+      "name": "Dr. Manoj Mukherjee",
+      "emailId": "manoj.mukherjee@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0041"
+    },
+    {
+      "name": "Prof. Balwinder Nanda",
+      "emailId": "balwinder.nanda@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "designation": "Assistant Professor",
+      "adminRole": null,
+      "employeeId": "EMP0042"
+    },
+    {
+      "name": "Prof. Dinesh Raghavan",
+      "emailId": "dinesh.raghavan@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0043"
+    },
+    {
+      "name": "Dr. Balwinder Parmar",
+      "emailId": "balwinder.parmar@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0003"
+    },
+    {
+      "name": "Prof. Khalid Balasubramanian",
+      "emailId": "khalid.balasubramanian@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0050"
+    },
+    {
+      "name": "Prof. Sunita Chakraborty",
+      "emailId": "sunita.chakraborty@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "designation": "Assistant Professor",
+      "adminRole": null,
+      "employeeId": "EMP0051"
+    },
+    {
+      "name": "Prof. Asif Chakraborty",
+      "emailId": "asif.chakraborty@curaj.ac.in",
+      "department": "Mechanical Engineering",
+      "designation": "Assistant Professor",
+      "adminRole": null,
+      "employeeId": "EMP0052"
+    },
+    {
+      "name": "Dr. Ayaan Krishnan",
+      "emailId": "ayaan.krishnan@curaj.ac.in",
+      "department": "Civil Engineering",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0004"
+    },
+    {
+      "name": "Dr. Kiran Nair",
+      "emailId": "kiran.nair@curaj.ac.in",
+      "department": "Civil Engineering",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0060"
+    },
+    {
+      "name": "Prof. Parvati Ojha",
+      "emailId": "parvati.ojha@curaj.ac.in",
+      "department": "Civil Engineering",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0061"
+    },
+    {
+      "name": "Dr. Radha Mishra",
+      "emailId": "radha.mishra@curaj.ac.in",
+      "department": "Electrical Engineering",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0005"
+    },
+    {
+      "name": "Prof. Gurpreet Gupta",
+      "emailId": "gurpreet.gupta@curaj.ac.in",
+      "department": "Electrical Engineering",
+      "designation": "Assistant Professor",
+      "adminRole": null,
+      "employeeId": "EMP0070"
+    },
+    {
+      "name": "Dr. Suresh Rajput",
+      "emailId": "suresh.rajput@curaj.ac.in",
+      "department": "Electrical Engineering",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0071"
+    },
+    {
+      "name": "Dr. Rumana Malik",
+      "emailId": "rumana.malik@curaj.ac.in",
+      "department": "Physics",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0006"
+    },
+    {
+      "name": "Prof. Tanvir Sen",
+      "emailId": "tanvir.sen@curaj.ac.in",
+      "department": "Physics",
+      "designation": "Assistant Professor",
+      "adminRole": null,
+      "employeeId": "EMP0080"
+    },
+    {
+      "name": "Prof. Mahesh Choudhary",
+      "emailId": "mahesh.choudhary@curaj.ac.in",
+      "department": "Physics",
+      "designation": "Assistant Professor",
+      "adminRole": null,
+      "employeeId": "EMP0081"
+    },
+    {
+      "name": "Prof. Aarohi Babu",
+      "emailId": "aarohi.babu@curaj.ac.in",
+      "department": "Physics",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0082"
+    },
+    {
+      "name": "Dr. Dinesh Roy",
+      "emailId": "dinesh.roy@curaj.ac.in",
+      "department": "Chemistry",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0007"
+    },
+    {
+      "name": "Dr. Manpreet Sastry",
+      "emailId": "manpreet.sastry@curaj.ac.in",
+      "department": "Chemistry",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0090"
+    },
+    {
+      "name": "Prof. Aanya Arora",
+      "emailId": "aanya.arora@curaj.ac.in",
+      "department": "Chemistry",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0091"
+    },
+    {
+      "name": "Dr. Zara Nanda",
+      "emailId": "zara.nanda@curaj.ac.in",
+      "department": "Mathematics",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0008"
+    },
+    {
+      "name": "Prof. Rudra Chauhan",
+      "emailId": "rudra.chauhan@curaj.ac.in",
+      "department": "Mathematics",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0100"
+    },
+    {
+      "name": "Dr. Atharv Nair",
+      "emailId": "atharv.nair@curaj.ac.in",
+      "department": "Mathematics",
+      "designation": "Professor",
+      "adminRole": null,
+      "employeeId": "EMP0101"
+    },
+    {
+      "name": "Prof. Reyansh Chowdhary",
+      "emailId": "reyansh.chowdhary@curaj.ac.in",
+      "department": "Mathematics",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0102"
+    },
+    {
+      "name": "Prof. Meera Rao",
+      "emailId": "meera.rao@curaj.ac.in",
+      "department": "Mathematics",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0103"
+    },
+    {
+      "name": "Dr. Meera Singh",
+      "emailId": "meera.singh@curaj.ac.in",
+      "department": "English",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0009"
+    },
+    {
+      "name": "Prof. Aarohi Meena",
+      "emailId": "aarohi.meena@curaj.ac.in",
+      "department": "English",
+      "designation": "Assistant Professor",
+      "adminRole": null,
+      "employeeId": "EMP0110"
+    },
+    {
+      "name": "Prof. Rakesh Siddiqui",
+      "emailId": "rakesh.siddiqui@curaj.ac.in",
+      "department": "English",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0111"
+    },
+    {
+      "name": "Dr. Suman Damor",
+      "emailId": "suman.damor@curaj.ac.in",
+      "department": "Management Studies",
+      "designation": "Professor",
+      "adminRole": "HOD",
+      "employeeId": "EMP0010"
+    },
+    {
+      "name": "Prof. Arjun Tiwari",
+      "emailId": "arjun.tiwari@curaj.ac.in",
+      "department": "Management Studies",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0120"
+    },
+    {
+      "name": "Prof. Rekha Bhatt",
+      "emailId": "rekha.bhatt@curaj.ac.in",
+      "department": "Management Studies",
+      "designation": "Associate Professor",
+      "adminRole": null,
+      "employeeId": "EMP0121"
+    },
+    {
+      "name": "Dr. Noor Tiwari",
+      "emailId": "noor.tiwari@curaj.ac.in",
+      "department": "Computer Science & Engineering",
+      "designation": "Professor",
+      "adminRole": "Dean of Academic Affairs",
+      "employeeId": "EMP0001"
+    },
+    {
+      "name": "Dr. Aisha Upadhyay",
+      "emailId": "aisha.upadhyay@curaj.ac.in",
+      "department": "Electronics & Communication Engineering",
+      "designation": "Professor",
+      "adminRole": "Dean of Research & Innovation",
+      "employeeId": "EMP0002"
+    },
+    {
+      "name": "Dr. Prem Shankar Mishra",
+      "emailId": "registrar@curaj.ac.in",
+      "department": "Administration",
+      "designation": "Professor",
+      "adminRole": "University Admin",
+      "employeeId": "EMP0000"
+    }
+  ]
+}
