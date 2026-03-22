@@ -16,6 +16,8 @@ const {
 } = require("../services/verificationToken");
 const universityDb = require("../university_data.json");
 
+const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || "http://localhost:5173";
+
 const findStudentInUniDb = (enrollmentNumber) =>
   universityDb.students.find(
     (s) => s.enrollmentNumber.toUpperCase() === enrollmentNumber.toUpperCase(),
@@ -102,7 +104,7 @@ const signupInit = async (req, res) => {
     if (user) {
       sendVerificationMail(
         emailId,
-        alreadyRegisteredTemplate(emailId, "http://localhost:8080/auth/login"),
+        alreadyRegisteredTemplate(emailId, `${FRONTEND_BASE_URL}/auth/login`),
       );
       return res.status(202).json({ message: resMessage, success: true });
     } else if (!uniRecord) {
@@ -119,7 +121,7 @@ const signupInit = async (req, res) => {
       sendVerificationMail(
         emailId,
         verifyEmailTemplate(
-          "http://10.50.12.123/auth/verify/" + `${verficationToken.rawToken}`,
+          `${FRONTEND_BASE_URL}/auth/verify/${verficationToken.rawToken}`,
         ),
       );
       return res.status(202).json({ message: resMessage, success: true });
@@ -150,6 +152,15 @@ const signupVerify = async (req, res) => {
     }
 
     const { passwordHash, userData, role } = parsedPayload;
+
+    // Idempotent verify: if account already exists, treat verification as complete.
+    const existingUser = await userModel.findOne({ emailId: userData.emailId });
+    if (existingUser) {
+      return res
+        .status(200)
+        .json({ message: "User already verified. Please log in.", success: true });
+    }
+
     const createPayload = {
       name: userData.name,
       emailId: userData.emailId,
@@ -170,7 +181,18 @@ const signupVerify = async (req, res) => {
         .json({ message: "Internal Server Error", success: false });
     }
 
-    await userModel.create(createPayload);
+    try {
+      await userModel.create(createPayload);
+    } catch (createErr) {
+      // Handles race conditions where two verification requests run concurrently.
+      if (createErr?.code === 11000) {
+        return res
+          .status(200)
+          .json({ message: "User already verified. Please log in.", success: true });
+      }
+      throw createErr;
+    }
+
     return res
       .status(201)
       .json({ message: "User registered successfully", success: true });
@@ -211,14 +233,14 @@ const forgotPasswordInit = async (req, res) => {
     } else {
       const userPayload = {
         userEmailId: user.emailId,
+        passwordHash: user.passwordHash,
         createdAt: Date.now(),
       };
       await storeToken(verficationToken.tokenHash, userPayload);
       sendVerificationMail(
         emailId,
         forgotPasswordResetLinkTemplate(
-          "http://10.50.12.123/auth/forgotPass/verify/" +
-            `${verficationToken.rawToken}`,
+          `${FRONTEND_BASE_URL}/auth/forgotPass/verify/${verficationToken.rawToken}`,
         ),
       );
       return res.status(202).json({ message: resMessage, success: true });
@@ -237,6 +259,7 @@ const forgotPasswordVerify = async (req, res) => {
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
+
     if (!token) {
       return res.status(400).json({ message: "Invalid token", success: false });
     }
@@ -250,10 +273,16 @@ const forgotPasswordVerify = async (req, res) => {
         .status(400)
         .json({ message: "Invalid or expired token", success: false });
     }
+    else if (parsedPayload.passwordHash === newPasswordHash)
+    {
+      return res
+        .status(400)
+        .json({ message: "Cannot use the old password again", success: false });
+    }
 
     const { userEmailId } = parsedPayload;
 
-    const updateResult = userModel.updateOne(
+    await userModel.updateOne(
       { emailId: userEmailId },
       { $set: { passwordHash: newPasswordHash } },
       { new: true },
