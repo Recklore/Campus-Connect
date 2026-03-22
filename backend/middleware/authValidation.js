@@ -52,7 +52,7 @@ const sanitizeRequest = (allowedFields) => (req, res, next) => {
  * automated probing cannot distinguish between a bad role, a bad enrollment
  * number, a bad email, or a bad password.
  */
-const signupRules = [
+const signupInitRules = [
   sanitizeRequest(["role", "enrollmentNumber", "emailId", "password"]),
 
   body("role")
@@ -210,7 +210,7 @@ const loginRules = [
  * Validates the token URL parameter for the email-verification endpoint.
  * Token must be a 64-character lowercase hex string (SHA-256 raw token).
  */
-const verifyRules = [
+const signupVerifyRules = [
   param("token")
     .optional()
     .notEmpty()
@@ -247,4 +247,148 @@ const verifyRules = [
   validate(INVALID_TOKEN),
 ];
 
-module.exports = { signupRules, loginRules, verifyRules, sanitizeRequest };
+// ─── Forgot-password init rules ──────────────────────────────────────────────
+/**
+ * Validates and sanitises forgot-password init request body.
+ *
+ * Accepted shapes:
+ *   { role: "student", enrollmentNumber: string }
+ *   { role: "senior",  emailId: string }
+ */
+const forgotPasswordInitRules = [
+  sanitizeRequest(["role", "enrollmentNumber", "emailId"]),
+
+  body("role")
+    .notEmpty()
+    .withMessage("Bad request")
+    .isString()
+    .withMessage("Bad request")
+    .trim()
+    .toLowerCase()
+    .isIn(["student", "senior"])
+    .withMessage("Bad request")
+    .escape(),
+
+  body("enrollmentNumber")
+    .if(body("role").equals("student"))
+    .notEmpty()
+    .withMessage("Bad request")
+    .isString()
+    .withMessage("Bad request")
+    .trim()
+    .toUpperCase()
+    .isLength({ min: 10, max: 14 })
+    .withMessage("Bad request")
+    .matches(/^\d{4}[A-Z]{4,6}\d{3}$/)
+    .withMessage("Bad request")
+    .escape(),
+
+  body("emailId")
+    .if(body("role").equals("senior"))
+    .notEmpty()
+    .withMessage("Bad request")
+    .isString()
+    .withMessage("Bad request")
+    .trim()
+    .toLowerCase()
+    .isLength({ min: 13, max: 50 })
+    .withMessage("Bad request")
+    .isEmail()
+    .withMessage("Bad request")
+    .normalizeEmail()
+    .custom((v) => {
+      if (!v.endsWith("@curaj.ac.in")) throw new Error("Bad request");
+      return true;
+    })
+    .escape(),
+
+  validate(BAD_REQUEST),
+];
+
+// ─── Forgot-password verify rules ───────────────────────────────────────────
+/**
+ * Validates forgot-password verification payload.
+ * Requires token in URL param or query string and a strong new password.
+ */
+const forgotPasswordVerifyRules = [
+  sanitizeRequest(["password"]),
+
+  param("token")
+    .optional()
+    .notEmpty()
+    .withMessage("Invalid token")
+    .isString()
+    .withMessage("Invalid token")
+    .trim()
+    .isLength({ min: 64, max: 64 })
+    .withMessage("Invalid token")
+    .matches(/^[a-f0-9]{64}$/)
+    .withMessage("Invalid token")
+    .escape(),
+
+  query("token")
+    .optional()
+    .notEmpty()
+    .withMessage("Invalid token")
+    .isString()
+    .withMessage("Invalid token")
+    .trim()
+    .isLength({ min: 64, max: 64 })
+    .withMessage("Invalid token")
+    .matches(/^[a-f0-9]{64}$/)
+    .withMessage("Invalid token")
+    .escape(),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Bad request")
+    .isString()
+    .withMessage("Bad request")
+    .trim()
+    .isLength({ min: 8, max: 64 })
+    .withMessage("Bad request")
+    .matches(/[A-Z]/)
+    .withMessage("Bad request")
+    .matches(/[a-z]/)
+    .withMessage("Bad request")
+    .matches(/[0-9]/)
+    .withMessage("Bad request")
+    .matches(/[^A-Za-z0-9]/)
+    .withMessage("Bad request")
+    .escape(),
+
+  (req, res, next) => {
+    if (req.params.token || req.query.token) {
+      return next();
+    }
+    return res.status(400).json(INVALID_TOKEN);
+  },
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (errors.isEmpty()) {
+      return next();
+    }
+
+    const hasTokenError = errors.array().some(
+      (error) =>
+        error.path === "token" &&
+        (error.location === "params" || error.location === "query"),
+    );
+
+    if (hasTokenError) {
+      return res.status(400).json(INVALID_TOKEN);
+    }
+
+    return res.status(400).json(BAD_REQUEST);
+  },
+];
+
+module.exports = {
+  signupInitRules,
+  loginRules,
+  signupVerifyRules,
+  forgotPasswordInitRules,
+  forgotPasswordVerifyRules,
+  sanitizeRequest,
+};

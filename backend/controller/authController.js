@@ -6,6 +6,8 @@ const {
   verifyEmailTemplate,
   alreadyRegisteredTemplate,
   notInRecordsTemplate,
+  forgotPasswordNotRegisteredTemplate,
+  forgotPasswordResetLinkTemplate,
 } = require("../tamplates/mailTemplates");
 const {
   generateToken,
@@ -26,7 +28,7 @@ const findSeniorInUniDb = (email) =>
 
 const login = async (req, res) => {
   try {
-    const errMsg = "Invalid credentials";
+    const resMessage = "Invalid credentials";
     const { role, password } = req.body;
 
     let emailId;
@@ -45,13 +47,13 @@ const login = async (req, res) => {
 
     if (!user) {
       const isPassCorrect = await bcrypt.compare(password, "polkadots");
-      return res.status(403).json({ message: errMsg, success: false });
+      return res.status(403).json({ message: resMessage, success: false });
     }
 
     const isPassCorrect = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPassCorrect) {
-      return res.status(403).json({ message: errMsg, success: false });
+      return res.status(403).json({ message: resMessage, success: false });
     }
 
     const jwtToken = jwt.sign(
@@ -65,101 +67,62 @@ const login = async (req, res) => {
       success: true,
       jwtToken,
     });
-  } catch (err){
+  } catch (err) {
     return res
       .status(500)
       .json({ message: `Internal Server Error ${err}`, success: false });
   }
 };
 
-const signup = async (req, res) => {
+const signupInit = async (req, res) => {
   try {
     const resMessage = "Please check your email inbox for further instructions";
-    const { role } = req.body;
+    const { role, password } = req.body;
 
-    if (role === "student") {
-      const { enrollmentNumber, password } = req.body;
-      const emailId = enrollmentNumber + "@curaj.ac.in";
+    let emailId;
+    let uniRecord;
 
-      const passwordHash = await bcrypt.hash(password, 10);
-      const user = await userModel.findOne({
-        $or: [{ enrollmentNumber }, { emailId }],
-      });
-      const uniRecord = findStudentInUniDb(enrollmentNumber);
-      const verficationToken = generateToken();
-
-      if (user) {
-        sendVerificationMail(
-          emailId,
-          alreadyRegisteredTemplate(
-            emailId,
-            "http://localhost:8080/auth/login",
-          ),
-        );
-        return res.status(202).json({ message: resMessage, success: true });
-      }
-
-      if (!uniRecord) {
-        sendVerificationMail(emailId, notInRecordsTemplate(emailId));
-        return res.status(202).json({ message: resMessage, success: true });
-      } else {
-        const userPayload = {
-          userData: uniRecord,
-          passwordHash,
-          role,
-          createdAt: Date.now(),
-        };
-        await storeToken(verficationToken.tokenHash, userPayload);
-        sendVerificationMail(
-          emailId,
-          verifyEmailTemplate(
-            "http://10.50.12.123/auth/verify/" +
-              `${verficationToken.rawToken}`,
-          ),
-        );
-        return res.status(202).json({ message: resMessage, success: true });
-      }
+    if (!role) {
+      return res.status(400).json({ message: "Bad request", success: false });
+    } else if (role === "student") {
+      const { enrollmentNumber } = req.body;
+      emailId = enrollmentNumber.toLowerCase() + "@curaj.ac.in";
+      uniRecord = findStudentInUniDb(enrollmentNumber);
     } else if (role === "senior") {
-      const { emailId: identifier, password } = req.body;
-
-      const passwordHash = await bcrypt.hash(password, 10);
-      const user = await userModel.findOne({ emailId: identifier });
-      const uniRecord = findSeniorInUniDb(identifier);
-      const verficationToken = generateToken();
-
-      if (user) {
-        sendVerificationMail(
-          identifier,
-          alreadyRegisteredTemplate(
-            identifier,
-            "http://localhost:8080/auth/login",
-          ),
-        );
-        return res.status(202).json({ message: resMessage, success: true });
-      }
-
-      if (!uniRecord) {
-        sendVerificationMail(identifier, notInRecordsTemplate(identifier));
-        return res.status(202).json({ message: resMessage, success: true });
-      } else {
-        const userPayload = {
-          userData: uniRecord,
-          passwordHash,
-          role,
-          createdAt: Date.now(),
-        };
-        await storeToken(verficationToken.tokenHash, userPayload);
-        sendVerificationMail(
-          identifier,
-          verifyEmailTemplate(
-            "http://localhost:8080/auth/verify/" +
-              `${verficationToken.rawToken}`,
-          ),
-        );
-        return res.status(202).json({ message: resMessage, success: true });
-      }
+      emailId = req.body.emailId?.toLowerCase();
+      uniRecord = findSeniorInUniDb(emailId);
     } else {
-      return res.status(400).json({ message: "Invalid Role", success: false });
+      return res.status(400).json({ message: "Bad request", success: false });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await userModel.findOne({ emailId });
+    const verficationToken = generateToken();
+
+    if (user) {
+      sendVerificationMail(
+        emailId,
+        alreadyRegisteredTemplate(emailId, "http://localhost:8080/auth/login"),
+      );
+      return res.status(202).json({ message: resMessage, success: true });
+    } else if (!uniRecord) {
+      sendVerificationMail(emailId, notInRecordsTemplate(emailId));
+      return res.status(202).json({ message: resMessage, success: true });
+    } else {
+      const userPayload = {
+        userData: uniRecord,
+        passwordHash,
+        role,
+        createdAt: Date.now(),
+      };
+      await storeToken(verficationToken.tokenHash, userPayload);
+      sendVerificationMail(
+        emailId,
+        verifyEmailTemplate(
+          "http://10.50.12.123/auth/verify/" + `${verficationToken.rawToken}`,
+        ),
+      );
+      return res.status(202).json({ message: resMessage, success: true });
     }
   } catch (err) {
     return res
@@ -168,7 +131,7 @@ const signup = async (req, res) => {
   }
 };
 
-const verify = async (req, res) => {
+const signupVerify = async (req, res) => {
   try {
     const token = req.params.token || req.query.token;
 
@@ -218,4 +181,98 @@ const verify = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, verify };
+const forgotPasswordInit = async (req, res) => {
+  try {
+    const resMessage = "Please check your email inbox for further instructions";
+    const { role } = req.body;
+
+    let emailId;
+
+    if (!role) {
+      return res.status(400).json({ message: "Bad request", success: false });
+    } else if (role === "student") {
+      const { enrollmentNumber } = req.body;
+      emailId = enrollmentNumber.toLowerCase() + "@curaj.ac.in";
+    } else if (role === "senior") {
+      emailId = req.body.emailId?.toLowerCase();
+    } else {
+      return res.status(400).json({ message: "Bad request", success: false });
+    }
+
+    const user = await userModel.findOne({ emailId });
+    const verficationToken = generateToken();
+
+    if (!user) {
+      sendVerificationMail(
+        emailId,
+        forgotPasswordNotRegisteredTemplate(emailId),
+      );
+      return res.status(202).json({ message: resMessage, success: true });
+    } else {
+      const userPayload = {
+        userEmailId: user.emailId,
+        createdAt: Date.now(),
+      };
+      await storeToken(verficationToken.tokenHash, userPayload);
+      sendVerificationMail(
+        emailId,
+        forgotPasswordResetLinkTemplate(
+          "http://10.50.12.123/auth/forgotPass/verify/" +
+            `${verficationToken.rawToken}`,
+        ),
+      );
+      return res.status(202).json({ message: resMessage, success: true });
+    }
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error ${err}`, success: false });
+  }
+};
+
+const forgotPasswordVerify = async (req, res) => {
+  try {
+    const token = req.params.token || req.query.token;
+    const newPassword = req.body.password;
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    if (!token) {
+      return res.status(400).json({ message: "Invalid token", success: false });
+    }
+
+    const payload = await verfiyAndDeleteToken(token);
+    const parsedPayload =
+      typeof payload === "string" ? JSON.parse(payload) : payload;
+
+    if (!parsedPayload) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired token", success: false });
+    }
+
+    const { userEmailId } = parsedPayload;
+
+    const updateResult = userModel.updateOne(
+      { emailId: userEmailId },
+      { $set: { passwordHash: newPasswordHash } },
+      { new: true },
+    );
+
+    return res
+      .status(201)
+      .json({ message: "Password changed successfully", success: true });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error ${err}`, success: false });
+  }
+};
+
+module.exports = {
+  login,
+  signupInit,
+  signupVerify,
+  forgotPasswordInit,
+  forgotPasswordVerify,
+};
