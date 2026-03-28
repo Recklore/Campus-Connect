@@ -1,5 +1,13 @@
 const redis = require("redis");
+const {RedisStore} =require('rate-limit-redis')
 require("dotenv").config()
+
+const makeStore = (prefix) => {
+  return new RedisStore({
+    sendCommand: (...args) => redisClient.sendCommand(args),
+    prefix,
+  });
+}
 
 const redisClient = redis.createClient({
   username: process.env.REDIS_USERNAME,
@@ -21,4 +29,4 @@ const connectRedis = async () => {
   }
 };
 
-module.exports = { redisClient, connectRedis };
+module.exports = { redisClient, connectRedis, makeStore };

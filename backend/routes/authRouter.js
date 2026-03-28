@@ -15,27 +15,53 @@ const {
   forgotPasswordInitRules,
   forgotPasswordVerifyRules,
 } = require("../middleware/authValidation");
+const {
+  loginLimiter,
+  signupLimiter,
+  guestLimiter,
+  ipCeilingLimiter,
+} = require("../middleware/rateLimiters");
 
-authRouter.post("/login", loginRules, login);
-authRouter.post("/guestLogin", guestLogin);
+authRouter.post("/login", loginLimiter, loginRules, login);
+authRouter.post("/guestLogin", guestLimiter, guestLogin);
 
-authRouter.post("/signup", signupInitRules, signupInit);
-authRouter.post("/verify/resend", signupInitRules, signupResend);
-authRouter.post("/verify/:token", signupVerifyRules, signupVerify);
-authRouter.post("/verify", signupVerifyRules, signupVerify);
+authRouter.post(
+  "/signup",
+  ipCeilingLimiter,
+  signupLimiter,
+  signupInitRules,
+  signupInit,
+);
+authRouter.post(
+  "/verify/resend",
+  ipCeilingLimiter,
+  signupLimiter,
+  signupInitRules,
+  signupResend,
+);
+authRouter.post(
+  "/verify/:token",
+  guestLimiter,
+  signupVerifyRules,
+  signupVerify,
+);
+authRouter.post("/verify", guestLimiter, signupVerifyRules, signupVerify);
 
 authRouter.post(
   "/forgotPass/init",
+  loginLimiter,
   forgotPasswordInitRules,
   forgotPasswordInit,
 );
 authRouter.post(
   "/forgotPass/verify/:token",
+  guestLimiter,
   forgotPasswordVerifyRules,
   forgotPasswordVerify,
 );
 authRouter.post(
   "/forgotPass/verify",
+  guestLimiter,
   forgotPasswordVerifyRules,
   forgotPasswordVerify,
 );

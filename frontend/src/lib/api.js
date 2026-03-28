@@ -1,10 +1,16 @@
+import { getFingerprint } from "./fingerprint";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
 
 const postJson = async (path, payload) => {
+  const fp = await getFingerprint()
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-device-fingerprint": fp
     },
     body: JSON.stringify(payload),
   });
