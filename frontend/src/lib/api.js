@@ -25,7 +25,9 @@ const postJson = async (path, payload) => {
 
 export const authApi = {
   login: (payload) => postJson("/auth/login", payload),
+  guestLogin: () => postJson("/auth/guestLogin", {}),
   signup: (payload) => postJson("/auth/signup", payload),
+  signupResend: (payload) => postJson("/auth/verify/resend", payload),
   signupVerify: (token) => postJson(`/auth/verify/${encodeURIComponent(token)}`, {}),
   forgotPasswordInit: (payload) => postJson("/auth/forgotPass/init", payload),
   forgotPasswordVerify: (token, payload) =>

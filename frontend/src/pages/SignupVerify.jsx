@@ -73,11 +73,11 @@ function SignupVerify() {
         {renderMessage()}
 
         {isVerified ? (
-          <ProceedButton type="button" onClick={() => navigate("/auth/login")}>Proceed to login -&gt;</ProceedButton>
+          <ProceedButton type="button" onClick={() => navigate("/auth/login")}>Proceed to login</ProceedButton>
         ) : null}
 
         {!loading && !isVerified ? (
-          <ProceedButton type="button" onClick={() => navigate("/auth/signup")}>Sign up again -&gt;</ProceedButton>
+          <ProceedButton type="button" onClick={() => navigate("/auth/signup")}>Sign up again</ProceedButton>
         ) : null}
 
         <p style={footStyle}>

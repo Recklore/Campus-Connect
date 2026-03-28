@@ -79,6 +79,23 @@ function Login() {
     }
   };
 
+  const handleGuestLogin = async () => {
+    setStatus("");
+    setErrors({});
+    setLoading(true);
+    try {
+      const response = await authApi.guestLogin();
+      if (response.data.jwtToken) {
+        localStorage.setItem("campus_connect_token", response.data.jwtToken);
+      }
+      setStatus(response.data.message || "Logged in as guest");
+    } catch (error) {
+      setStatus(error.message || "Unable to continue as guest");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthLayout photoSide="right">
       <FormPanel barVariant="reverse">
@@ -133,7 +150,19 @@ function Login() {
 
           {status ? <p className="status-text">{status}</p> : null}
 
-          <ProceedButton loading={loading}>Proceed -&gt;</ProceedButton>
+          <ProceedButton loading={loading}>Proceed</ProceedButton>
+
+          <p className="guest-access-row">
+            Just browsing?{" "}
+            <button
+              type="button"
+              className="guest-access-link"
+              onClick={handleGuestLogin}
+              disabled={loading}
+            >
+              Continue as guest
+            </button>
+          </p>
         </form>
 
         <p style={footStyle}>

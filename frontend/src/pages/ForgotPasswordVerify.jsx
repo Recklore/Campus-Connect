@@ -118,16 +118,16 @@ function ForgotPasswordVerify() {
               error={errors.confirmPassword}
             />
 
-            <ProceedButton loading={loading}>Proceed -&gt;</ProceedButton>
+            <ProceedButton loading={loading}>Proceed</ProceedButton>
           </form>
         ) : null}
 
         {isResetComplete ? (
-          <ProceedButton type="button" onClick={() => navigate("/auth/login")}>Proceed to login -&gt;</ProceedButton>
+          <ProceedButton type="button" onClick={() => navigate("/auth/login")}>Proceed to login</ProceedButton>
         ) : null}
 
         {!hasValidToken ? (
-          <ProceedButton type="button" onClick={() => navigate("/auth/forgotPass/init")}>Request new reset link -&gt;</ProceedButton>
+          <ProceedButton type="button" onClick={() => navigate("/auth/forgotPass/init")}>Request new reset link</ProceedButton>
         ) : null}
 
         <p style={footStyle}>

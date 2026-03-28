@@ -14,9 +14,13 @@ const {
   storeToken,
   verfiyAndDeleteToken,
 } = require("../services/verificationToken");
+const { redisClient } = require("../config/redis");
 const universityDb = require("../university_data.json");
 
-const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || "http://localhost:5173";
+const FRONTEND_BASE_URL =
+  process.env.FRONTEND_BASE_URL || "http://localhost:5173";
+const SIGNUP_RESEND_COOLDOWN_SECONDS = 30;
+const SIGNUP_RESEND_COOLDOWN_PREFIX = "signup:resend:cooldown:";
 
 const findStudentInUniDb = (enrollmentNumber) =>
   universityDb.students.find(
@@ -27,6 +31,17 @@ const findSeniorInUniDb = (email) =>
   universityDb.seniors.find(
     (s) => s.emailId.toLowerCase() === email.toLowerCase(),
   ) || null;
+
+const guestLogin = (req, res) => {
+  const jwtToken = jwt.sign(
+    { role: "guest", roleLevel: 0 },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: 3600 },
+  );
+  return res
+    .status(200)
+    .json({ message: "Logged in as guest", success: true, jwtToken });
+};
 
 const login = async (req, res) => {
   try {
@@ -133,6 +148,84 @@ const signupInit = async (req, res) => {
   }
 };
 
+const signupResend = async (req, res) => {
+  try {
+    const resMessage = "Please check your email inbox for further instructions";
+    const { role, password } = req.body;
+
+    let emailId;
+    let uniRecord;
+
+    if (!role) {
+      return res.status(400).json({ message: "Bad request", success: false });
+    } else if (role === "student") {
+      const { enrollmentNumber } = req.body;
+      emailId = enrollmentNumber.toLowerCase() + "@curaj.ac.in";
+      uniRecord = findStudentInUniDb(enrollmentNumber);
+    } else if (role === "senior") {
+      emailId = req.body.emailId?.toLowerCase();
+      uniRecord = findSeniorInUniDb(emailId);
+    } else {
+      return res.status(400).json({ message: "Bad request", success: false });
+    }
+
+    const cooldownKey = SIGNUP_RESEND_COOLDOWN_PREFIX + emailId;
+    const isCooldownActive = await redisClient.get(cooldownKey);
+
+    if (isCooldownActive) {
+      return res.status(202).json({ message: resMessage, success: true });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await userModel.findOne({ emailId });
+
+    if (user) {
+      sendVerificationMail(
+        emailId,
+        alreadyRegisteredTemplate(emailId, `${FRONTEND_BASE_URL}/auth/login`),
+      );
+      await redisClient.set(cooldownKey, "1", {
+        EX: SIGNUP_RESEND_COOLDOWN_SECONDS,
+      });
+      return res.status(202).json({ message: resMessage, success: true });
+    }
+
+    if (!uniRecord) {
+      sendVerificationMail(emailId, notInRecordsTemplate(emailId));
+      await redisClient.set(cooldownKey, "1", {
+        EX: SIGNUP_RESEND_COOLDOWN_SECONDS,
+      });
+      return res.status(202).json({ message: resMessage, success: true });
+    }
+
+    const verificationToken = generateToken();
+    const userPayload = {
+      userData: uniRecord,
+      passwordHash,
+      role,
+      createdAt: Date.now(),
+    };
+
+    await storeToken(verificationToken.tokenHash, userPayload);
+    sendVerificationMail(
+      emailId,
+      verifyEmailTemplate(
+        `${FRONTEND_BASE_URL}/auth/verify/${verificationToken.rawToken}`,
+      ),
+    );
+
+    await redisClient.set(cooldownKey, "1", {
+      EX: SIGNUP_RESEND_COOLDOWN_SECONDS,
+    });
+
+    return res.status(202).json({ message: resMessage, success: true });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error ${err}`, success: false });
+  }
+};
+
 const signupVerify = async (req, res) => {
   try {
     const token = req.params.token || req.query.token;
@@ -153,12 +246,14 @@ const signupVerify = async (req, res) => {
 
     const { passwordHash, userData, role } = parsedPayload;
 
-    // Idempotent verify: if account already exists, treat verification as complete.
     const existingUser = await userModel.findOne({ emailId: userData.emailId });
     if (existingUser) {
       return res
         .status(200)
-        .json({ message: "User already verified. Please log in.", success: true });
+        .json({
+          message: "User already verified. Please log in.",
+          success: true,
+        });
     }
 
     const createPayload = {
@@ -188,7 +283,10 @@ const signupVerify = async (req, res) => {
       if (createErr?.code === 11000) {
         return res
           .status(200)
-          .json({ message: "User already verified. Please log in.", success: true });
+          .json({
+            message: "User already verified. Please log in.",
+            success: true,
+          });
       }
       throw createErr;
     }
@@ -259,7 +357,6 @@ const forgotPasswordVerify = async (req, res) => {
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
-
     if (!token) {
       return res.status(400).json({ message: "Invalid token", success: false });
     }
@@ -272,9 +369,7 @@ const forgotPasswordVerify = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Invalid or expired token", success: false });
-    }
-    else if (parsedPayload.passwordHash === newPasswordHash)
-    {
+    } else if (parsedPayload.passwordHash === newPasswordHash) {
       return res
         .status(400)
         .json({ message: "Cannot use the old password again", success: false });
@@ -300,7 +395,9 @@ const forgotPasswordVerify = async (req, res) => {
 
 module.exports = {
   login,
+  guestLogin,
   signupInit,
+  signupResend,
   signupVerify,
   forgotPasswordInit,
   forgotPasswordVerify,

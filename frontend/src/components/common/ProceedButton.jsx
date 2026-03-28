@@ -1,5 +1,5 @@
 function ProceedButton({
-  children = "Proceed ->",
+  children = "Proceed",
   type = "submit",
   loading = false,
   disabled = false,

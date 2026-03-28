@@ -1,26 +1,27 @@
 export const headingStyle = {
   fontFamily: "'Bitter', serif",
-  fontSize: "clamp(24px, 2.6vw, 32px)",
+  fontSize: "clamp(25px, 2.7vw, 34px)",
   fontWeight: 600,
   color: "var(--text)",
-  letterSpacing: "-0.3px",
-  lineHeight: 1.2,
-  margin: "0 0 7px",
+  letterSpacing: "-0.45px",
+  lineHeight: 1.14,
+  margin: "0 0 9px",
 };
 
 export const subtitleStyle = {
-  fontSize: "13.5px",
+  fontSize: "14px",
   color: "var(--muted)",
-  fontWeight: 400,
+  fontWeight: 500,
   lineHeight: 1.5,
   margin: 0,
 };
 
 export const footStyle = {
-  marginTop: "20px",
+  marginTop: "16px",
   fontSize: "13px",
   color: "var(--muted)",
   textAlign: "center",
+  lineHeight: 1.5,
 };
 
 export const linkStyle = {

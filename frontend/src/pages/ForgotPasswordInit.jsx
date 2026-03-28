@@ -95,7 +95,7 @@ function ForgotPasswordInit() {
 
           {status ? <p className="status-text">{status}</p> : null}
 
-          <ProceedButton loading={loading}>Send reset link -&gt;</ProceedButton>
+          <ProceedButton loading={loading}>Send reset link</ProceedButton>
         </form>
 
         <p style={footStyle}>
