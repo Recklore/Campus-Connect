@@ -12,6 +12,9 @@ const {
 const {
   generateToken,
   storeToken,
+  storeSignupPendingToken,
+  getSignupPendingByEmail,
+  refreshSignupPendingTtl,
   verfiyAndDeleteToken,
 } = require("../services/verificationToken");
 const { redisClient } = require("../config/redis");
@@ -21,6 +24,28 @@ const FRONTEND_BASE_URL =
   process.env.FRONTEND_BASE_URL || "http://localhost:5173";
 const SIGNUP_RESEND_COOLDOWN_SECONDS = 30;
 const SIGNUP_RESEND_COOLDOWN_PREFIX = "signup:resend:cooldown:";
+const AUTH_COOKIE_NAME = "campus_connect_token";
+
+const getCookieBaseOptions = () => {
+  const isProd = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
+  };
+};
+
+const setAuthCookie = (res, token) => {
+  res.cookie(AUTH_COOKIE_NAME, token, {
+    ...getCookieBaseOptions(),
+    maxAge: 60 * 60 * 1000,
+  });
+};
+
+const clearAuthCookie = (res) => {
+  res.clearCookie(AUTH_COOKIE_NAME, getCookieBaseOptions());
+};
 
 const findStudentInUniDb = (enrollmentNumber) =>
   universityDb.students.find(
@@ -38,9 +63,8 @@ const guestLogin = (req, res) => {
     process.env.JWT_SECRET_KEY,
     { expiresIn: 3600 },
   );
-  return res
-    .status(200)
-    .json({ message: "Logged in as guest", success: true, jwtToken });
+  setAuthCookie(res, jwtToken);
+  return res.status(200).json({ message: "Logged in as guest", success: true });
 };
 
 const login = async (req, res) => {
@@ -63,14 +87,14 @@ const login = async (req, res) => {
     const user = await userModel.findOne({ emailId });
 
     if (!user) {
-      const isPassCorrect = await bcrypt.compare(password, "polkadots");
-      return res.status(403).json({ message: resMessage, success: false });
+      await bcrypt.compare(password, "polkadots");
+      return res.status(401).json({ message: resMessage, success: false });
     }
 
     const isPassCorrect = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPassCorrect) {
-      return res.status(403).json({ message: resMessage, success: false });
+      return res.status(401).json({ message: resMessage, success: false });
     }
 
     const jwtToken = jwt.sign(
@@ -79,16 +103,22 @@ const login = async (req, res) => {
       { expiresIn: 3600 },
     );
 
-    return res.status(202).json({
+    setAuthCookie(res, jwtToken);
+
+    return res.status(200).json({
       message: "Login successful",
       success: true,
-      jwtToken,
     });
   } catch (err) {
     return res
       .status(500)
       .json({ message: `Internal Server Error ${err}`, success: false });
   }
+};
+
+const logout = async (req, res) => {
+  clearAuthCookie(res);
+  return res.status(200).json({ success: true, message: "Logged out" });
 };
 
 const signupInit = async (req, res) => {
@@ -132,7 +162,12 @@ const signupInit = async (req, res) => {
         role,
         createdAt: Date.now(),
       };
-      await storeToken(verficationToken.tokenHash, userPayload);
+      await storeSignupPendingToken({
+        emailId,
+        tokenHash: verficationToken.tokenHash,
+        rawToken: verficationToken.rawToken,
+        payload: userPayload,
+      });
       sendVerificationMail(
         emailId,
         verifyEmailTemplate(
@@ -151,7 +186,7 @@ const signupInit = async (req, res) => {
 const signupResend = async (req, res) => {
   try {
     const resMessage = "Please check your email inbox for further instructions";
-    const { role, password } = req.body;
+    const { role } = req.body;
 
     let emailId;
     let uniRecord;
@@ -176,7 +211,6 @@ const signupResend = async (req, res) => {
       return res.status(202).json({ message: resMessage, success: true });
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
     const user = await userModel.findOne({ emailId });
 
     if (user) {
@@ -198,21 +232,17 @@ const signupResend = async (req, res) => {
       return res.status(202).json({ message: resMessage, success: true });
     }
 
-    const verificationToken = generateToken();
-    const userPayload = {
-      userData: uniRecord,
-      passwordHash,
-      role,
-      createdAt: Date.now(),
-    };
+    const pendingSignup = await getSignupPendingByEmail(emailId);
 
-    await storeToken(verificationToken.tokenHash, userPayload);
-    sendVerificationMail(
-      emailId,
-      verifyEmailTemplate(
-        `${FRONTEND_BASE_URL}/auth/verify/${verificationToken.rawToken}`,
-      ),
-    );
+    if (pendingSignup?.payload?.rawToken) {
+      await refreshSignupPendingTtl(emailId, pendingSignup.tokenHash);
+      sendVerificationMail(
+        emailId,
+        verifyEmailTemplate(
+          `${FRONTEND_BASE_URL}/auth/verify/${pendingSignup.payload.rawToken}`,
+        ),
+      );
+    }
 
     await redisClient.set(cooldownKey, "1", {
       EX: SIGNUP_RESEND_COOLDOWN_SECONDS,
@@ -228,7 +258,7 @@ const signupResend = async (req, res) => {
 
 const signupVerify = async (req, res) => {
   try {
-    const token = req.params.token || req.query.token;
+    const token = req.params.token;
 
     if (!token) {
       return res.status(400).json({ message: "Invalid token", success: false });
@@ -279,7 +309,6 @@ const signupVerify = async (req, res) => {
     try {
       await userModel.create(createPayload);
     } catch (createErr) {
-      // Handles race conditions where two verification requests run concurrently.
       if (createErr?.code === 11000) {
         return res
           .status(200)
@@ -292,7 +321,7 @@ const signupVerify = async (req, res) => {
     }
 
     return res
-      .status(201)
+      .status(200)
       .json({ message: "User registered successfully", success: true });
   } catch (err) {
     return res
@@ -352,10 +381,8 @@ const forgotPasswordInit = async (req, res) => {
 
 const forgotPasswordVerify = async (req, res) => {
   try {
-    const token = req.params.token || req.query.token;
+    const token = req.params.token;
     const newPassword = req.body.password;
-
-    const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
     if (!token) {
       return res.status(400).json({ message: "Invalid token", success: false });
@@ -369,11 +396,20 @@ const forgotPasswordVerify = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Invalid or expired token", success: false });
-    } else if (parsedPayload.passwordHash === newPasswordHash) {
+    }
+
+    const isPasswordReused = await bcrypt.compare(
+      newPassword,
+      parsedPayload.passwordHash,
+    );
+
+    if (isPasswordReused) {
       return res
         .status(400)
         .json({ message: "Cannot use the old password again", success: false });
     }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
     const { userEmailId } = parsedPayload;
 
@@ -384,7 +420,7 @@ const forgotPasswordVerify = async (req, res) => {
     );
 
     return res
-      .status(201)
+      .status(200)
       .json({ message: "Password changed successfully", success: true });
   } catch (err) {
     return res
@@ -396,6 +432,7 @@ const forgotPasswordVerify = async (req, res) => {
 module.exports = {
   login,
   guestLogin,
+  logout,
   signupInit,
   signupResend,
   signupVerify,

@@ -1,4 +1,4 @@
-async function genrerateFingerprint() {
+async function generateClientKey() {
   const signals = {};
 
   signals.ua = navigator.userAgent;
@@ -6,7 +6,7 @@ async function genrerateFingerprint() {
   signals.tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   signals.screen = `${screen.width}x${screen.height}x${screen.colorDepth}`;
   signals.cores = navigator.hardwareConcurrency || 0;
-  signals.cores = navigator.maxTouchPoints;
+  signals.touchPoints = navigator.maxTouchPoints || 0;
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -32,7 +32,7 @@ async function genrerateFingerprint() {
     gain.connect(audioCtx.destination);
     oscillator.start(0);
 
-    const buffer = await audioCtx.startRendering;
+    const buffer = await audioCtx.startRendering();
     const data = buffer.getChannelData(0).slice(4500, 4600);
     signals.audio = data.reduce((a, b) => a + Math.abs(b), 0).toString();
   } catch {
@@ -46,12 +46,12 @@ async function genrerateFingerprint() {
   );
   const hashArray = Array.from(new Uint8Array(hashBuffer));
 
-  return hashArray.map((b) => b.toString(16).padStart(2, "0").join(""));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 let cached = null;
 
-export async function getFingerprint() {
-  if (!cached) cached = await genrerateFingerprint();
+export async function getClientKey() {
+  if (!cached) cached = await generateClientKey();
   return cached;
 }

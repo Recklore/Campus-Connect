@@ -1,5 +1,15 @@
 import { useState } from "react";
 
+function EyeIcon({ crossed = false }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="field-eye-icon">
+      <path d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
+      <circle cx="12" cy="12" r="3.25" />
+      {crossed ? <path d="M4 20L20 4" /> : null}
+    </svg>
+  );
+}
+
 function Field({
   label,
   name,
@@ -16,14 +26,6 @@ function Field({
   const inputType = isPasswordField
     ? (isPasswordVisible ? "text" : "password")
     : type;
-
-  const EyeIcon = ({ crossed = false }) => (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="field-eye-icon">
-      <path d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
-      <circle cx="12" cy="12" r="3.25" />
-      {crossed ? <path d="M4 20L20 4" /> : null}
-    </svg>
-  );
 
   return (
     <div className="field-wrap">

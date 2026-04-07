@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Brand from "../components/common/Brand";
 import Field from "../components/common/Field";
 import FormPanel from "../components/common/FormPanel";
@@ -11,6 +11,7 @@ import { normalizeIdentifier, validateIdentifier } from "../lib/authValidators";
 import { footStyle, headingStyle, linkStyle, subtitleStyle } from "../styles/shared";
 
 function Login() {
+  const navigate = useNavigate();
   const [role, setRole] = useState("student");
   const [form, setForm] = useState({ enrollmentNumber: "", emailId: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -67,8 +68,9 @@ function Login() {
       };
 
       const response = await authApi.login(payload);
-      if (response.data.jwtToken) {
-        localStorage.setItem("campus_connect_token", response.data.jwtToken);
+      if (response.data.success) {
+        navigate("/app", { replace: true });
+        return;
       }
       setStatus(response.data.message || "Login successful");
       setErrors({});
@@ -85,8 +87,9 @@ function Login() {
     setLoading(true);
     try {
       const response = await authApi.guestLogin();
-      if (response.data.jwtToken) {
-        localStorage.setItem("campus_connect_token", response.data.jwtToken);
+      if (response.data.success) {
+        navigate("/app", { replace: true });
+        return;
       }
       setStatus(response.data.message || "Logged in as guest");
     } catch (error) {

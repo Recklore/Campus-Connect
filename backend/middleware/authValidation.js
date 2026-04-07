@@ -1,4 +1,4 @@
-const { body, param, query, validationResult } = require("express-validator");
+const { body, param, validationResult } = require("express-validator");
 
 // ─── Generic error payloads ───────────────────────────────────────────────────
 // Intentionally vague to prevent user enumeration, credential stuffing hints,
@@ -124,6 +124,56 @@ const signupInitRules = [
   validate(BAD_REQUEST),
 ];
 
+const signupResendRules = [
+  sanitizeRequest(["role", "enrollmentNumber", "emailId"]),
+
+  body("role")
+    .notEmpty()
+    .withMessage("Bad request")
+    .isString()
+    .withMessage("Bad request")
+    .trim()
+    .toLowerCase()
+    .isIn(["student", "senior"])
+    .withMessage("Bad request")
+    .escape(),
+
+  body("enrollmentNumber")
+    .if(body("role").equals("student"))
+    .notEmpty()
+    .withMessage("Bad request")
+    .isString()
+    .withMessage("Bad request")
+    .trim()
+    .toUpperCase()
+    .isLength({ min: 10, max: 14 })
+    .withMessage("Bad request")
+    .matches(/^\d{4}[A-Z]{4,6}\d{3}$/)
+    .withMessage("Bad request")
+    .escape(),
+
+  body("emailId")
+    .if(body("role").equals("senior"))
+    .notEmpty()
+    .withMessage("Bad request")
+    .isString()
+    .withMessage("Bad request")
+    .trim()
+    .toLowerCase()
+    .isLength({ min: 13, max: 50 })
+    .withMessage("Bad request")
+    .isEmail()
+    .withMessage("Bad request")
+    .normalizeEmail()
+    .custom((v) => {
+      if (!v.endsWith("@curaj.ac.in")) throw new Error("Bad request");
+      return true;
+    })
+    .escape(),
+
+  validate(BAD_REQUEST),
+];
+
 // ─── Login rules ──────────────────────────────────────────────────────────────
 /**
  * Validates and sanitises the login request body.
@@ -212,7 +262,6 @@ const loginRules = [
  */
 const signupVerifyRules = [
   param("token")
-    .optional()
     .notEmpty()
     .withMessage("Invalid token")
     .isString()
@@ -223,26 +272,6 @@ const signupVerifyRules = [
     .matches(/^[a-f0-9]{64}$/)
     .withMessage("Invalid token")
     .escape(),
-
-  query("token")
-    .optional()
-    .notEmpty()
-    .withMessage("Invalid token")
-    .isString()
-    .withMessage("Invalid token")
-    .trim()
-    .isLength({ min: 64, max: 64 })
-    .withMessage("Invalid token")
-    .matches(/^[a-f0-9]{64}$/)
-    .withMessage("Invalid token")
-    .escape(),
-
-  (req, res, next) => {
-    if (req.params.token || req.query.token) {
-      return next();
-    }
-    return res.status(400).json(INVALID_TOKEN);
-  },
 
   validate(INVALID_TOKEN),
 ];
@@ -308,26 +337,12 @@ const forgotPasswordInitRules = [
 // ─── Forgot-password verify rules ───────────────────────────────────────────
 /**
  * Validates forgot-password verification payload.
- * Requires token in URL param or query string and a strong new password.
+ * Requires token in URL param and a strong new password.
  */
 const forgotPasswordVerifyRules = [
   sanitizeRequest(["password"]),
 
   param("token")
-    .optional()
-    .notEmpty()
-    .withMessage("Invalid token")
-    .isString()
-    .withMessage("Invalid token")
-    .trim()
-    .isLength({ min: 64, max: 64 })
-    .withMessage("Invalid token")
-    .matches(/^[a-f0-9]{64}$/)
-    .withMessage("Invalid token")
-    .escape(),
-
-  query("token")
-    .optional()
     .notEmpty()
     .withMessage("Invalid token")
     .isString()
@@ -358,13 +373,6 @@ const forgotPasswordVerifyRules = [
     .escape(),
 
   (req, res, next) => {
-    if (req.params.token || req.query.token) {
-      return next();
-    }
-    return res.status(400).json(INVALID_TOKEN);
-  },
-
-  (req, res, next) => {
     const errors = validationResult(req);
     if (errors.isEmpty()) {
       return next();
@@ -373,7 +381,7 @@ const forgotPasswordVerifyRules = [
     const hasTokenError = errors.array().some(
       (error) =>
         error.path === "token" &&
-        (error.location === "params" || error.location === "query"),
+        error.location === "params",
     );
 
     if (hasTokenError) {
@@ -386,6 +394,7 @@ const forgotPasswordVerifyRules = [
 
 module.exports = {
   signupInitRules,
+  signupResendRules,
   loginRules,
   signupVerifyRules,
   forgotPasswordInitRules,

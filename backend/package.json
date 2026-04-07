@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "test:rate-limit": "node scripts/testRateLimiting.js",
+    "seed:Departments": "node scripts/seedDepartments.js",
+    "seed:Users": "node scripts/seedUsers.js",
+    "seed:Posts": "node scripts/seedPosts.js"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +17,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "crypto": "^1.0.1",
     "dotenv": "^17.3.1",
@@ -22,6 +27,7 @@
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
+    "multer": "^2.1.1",
     "nodemailer": "^8.0.2",
     "rate-limit-redis": "^4.3.1",
     "redis": "^5.11.0"

@@ -131,8 +131,9 @@ function Signup() {
     setLoading(true);
     try {
       const response = await authApi.guestLogin();
-      if (response.data.jwtToken) {
-        localStorage.setItem("campus_connect_token", response.data.jwtToken);
+      if (response.data.success) {
+        navigate("/app", { replace: true });
+        return;
       }
       setStatus(response.data.message || "Logged in as guest");
     } catch (error) {

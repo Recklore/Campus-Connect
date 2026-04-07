@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Brand from "../components/common/Brand";
 import FormPanel from "../components/common/FormPanel";
 import ProceedButton from "../components/common/ProceedButton";
@@ -10,8 +10,7 @@ import { footStyle, headingStyle, linkStyle, subtitleStyle } from "../styles/sha
 function SignupVerify() {
   const navigate = useNavigate();
   const { token: paramToken } = useParams();
-  const [searchParams] = useSearchParams();
-  const verifyToken = useMemo(() => paramToken || searchParams.get("token") || "", [paramToken, searchParams]);
+  const verifyToken = (paramToken || "").trim();
 
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -20,8 +19,7 @@ function SignupVerify() {
 
   useEffect(() => {
     const attemptVerification = async () => {
-      const token = verifyToken.trim();
-      if (!/^[a-f0-9]{64}$/.test(token)) {
+      if (!/^[a-f0-9]{64}$/.test(verifyToken)) {
         setError("Invalid or missing verification link. Please sign up again.");
         return;
       }
@@ -31,7 +29,7 @@ function SignupVerify() {
       setError("");
 
       try {
-        const response = await authApi.signupVerify(token);
+        const response = await authApi.signupVerify(verifyToken);
         setStatus(response.data.message || "User registered successfully");
         setIsVerified(true);
       } catch (err) {

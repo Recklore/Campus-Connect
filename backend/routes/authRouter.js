@@ -2,6 +2,7 @@ const authRouter = require("express").Router();
 const {
   login,
   guestLogin,
+  logout,
   signupInit,
   signupResend,
   signupVerify,
@@ -11,6 +12,7 @@ const {
 const {
   loginRules,
   signupInitRules,
+  signupResendRules,
   signupVerifyRules,
   forgotPasswordInitRules,
   forgotPasswordVerifyRules,
@@ -24,6 +26,7 @@ const {
 
 authRouter.post("/login", loginLimiter, loginRules, login);
 authRouter.post("/guestLogin", guestLimiter, guestLogin);
+authRouter.post("/logout", guestLimiter, logout);
 
 authRouter.post(
   "/signup",
@@ -36,7 +39,7 @@ authRouter.post(
   "/verify/resend",
   ipCeilingLimiter,
   signupLimiter,
-  signupInitRules,
+  signupResendRules,
   signupResend,
 );
 authRouter.post(
@@ -45,7 +48,6 @@ authRouter.post(
   signupVerifyRules,
   signupVerify,
 );
-authRouter.post("/verify", guestLimiter, signupVerifyRules, signupVerify);
 
 authRouter.post(
   "/forgotPass/init",
@@ -55,12 +57,6 @@ authRouter.post(
 );
 authRouter.post(
   "/forgotPass/verify/:token",
-  guestLimiter,
-  forgotPasswordVerifyRules,
-  forgotPasswordVerify,
-);
-authRouter.post(
-  "/forgotPass/verify",
   guestLimiter,
   forgotPasswordVerifyRules,
   forgotPasswordVerify,

@@ -1,61 +1,12 @@
 {
-  "meta": {
-    "university": "Central University of Rajasthan (CURAJ)",
-    "domain": "@curaj.ac.in",
-    "generated": "2026-03-15",
-    "totalStudents": 60,
-    "totalSeniors": 41
-  },
-  "departments": [
+    "students": [
     {
-      "code": "CSE",
-      "name": "Computer Science & Engineering"
-    },
-    {
-      "code": "ECE",
-      "name": "Electronics & Communication Engineering"
-    },
-    {
-      "code": "ME",
-      "name": "Mechanical Engineering"
-    },
-    {
-      "code": "CE",
-      "name": "Civil Engineering"
-    },
-    {
-      "code": "EE",
-      "name": "Electrical Engineering"
-    },
-    {
-      "code": "PHY",
-      "name": "Physics"
-    },
-    {
-      "code": "CHM",
-      "name": "Chemistry"
-    },
-    {
-      "code": "MTH",
-      "name": "Mathematics"
-    },
-    {
-      "code": "ENG",
-      "name": "English"
-    },
-    {
-      "code": "MGT",
-      "name": "Management Studies"
-    }
-  ],
-  "students": [
-    {
-      "name": "Anjali Ghosh",
+      "name": "Aman Singh Rathour",
       "enrollmentNumber": "2023BTCSE004",
       "emailId": "2023btcse004@curaj.ac.in",
-      "department": "English",
-      "dob": "2005-12-09",
-      "program": "Bachelor of Arts"
+      "department": "Computer Science & Engineering",
+      "dob": "2004-04-23",
+      "program": "Bachelor of Technology"
     },
     {
       "name": "Parminder Bhatt",

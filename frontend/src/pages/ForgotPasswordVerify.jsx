@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Brand from "../components/common/Brand";
 import Field from "../components/common/Field";
 import FormPanel from "../components/common/FormPanel";
@@ -12,8 +12,7 @@ import { footStyle, headingStyle, linkStyle, subtitleStyle } from "../styles/sha
 function ForgotPasswordVerify() {
   const navigate = useNavigate();
   const { token: paramToken } = useParams();
-  const [searchParams] = useSearchParams();
-  const resetToken = useMemo(() => paramToken || searchParams.get("token") || "", [paramToken, searchParams]);
+  const resetToken = (paramToken || "").trim();
   const hasValidToken = /^[a-f0-9]{64}$/.test(resetToken.trim());
 
   const [password, setPassword] = useState("");
