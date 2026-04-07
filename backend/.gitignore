@@ -1,5 +1,5 @@
 *node_modules
-*.env\
+*.env
 university_data.json
 department_data.json
 post_data.json
