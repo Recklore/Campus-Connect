@@ -5,7 +5,7 @@ const { main } = require("../config/db");
 const { userModel, ROLE_LEVELS } = require("../models/user");
 const universityData = require("../university_data.json");
 
-const DEFAULT_SEED_PASSWORD = process.env.SEED_USER_PASSWORD || "Temp@1234";
+const DEFAULT_SEED_PASSWORD = process.env.SEED_USER_PASSWORD;
 
 const ALLOWED_DESIGNATIONS = new Set([
   "Assistant Professor",
@@ -102,7 +102,7 @@ const buildUserRows = (data) => {
       roleLevel: ROLE_LEVELS.student,
       designation: null,
       employeeId: null,
-      isActive: true,
+      isActive: false,
     });
   }
 
@@ -146,7 +146,7 @@ const buildUserRows = (data) => {
       role,
       roleLevel: ROLE_LEVELS[role] ?? ROLE_LEVELS.senior,
       designation: ALLOWED_DESIGNATIONS.has(designation) ? designation : null,
-      isActive: true,
+      isActive: false,
     });
   }
 

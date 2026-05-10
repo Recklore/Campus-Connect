@@ -8,15 +8,20 @@
     "test:rate-limit": "node scripts/testRateLimiting.js",
     "seed:Departments": "node scripts/seedDepartments.js",
     "seed:Users": "node scripts/seedUsers.js",
-    "seed:Posts": "node scripts/seedPosts.js"
+    "seed:Posts": "node scripts/seedPosts.js",
+    "auto-approve-posts": "node scripts/autoApprovePosts.js",
+    "moderation-scan": "node scripts/runModerationScan.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "axios": "^1.16.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.2",
+    "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "crypto": "^1.0.1",
@@ -28,8 +33,16 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.4",
     "multer": "^2.1.1",
+    "node-cron": "^4.2.1",
     "nodemailer": "^8.0.2",
     "rate-limit-redis": "^4.3.1",
-    "redis": "^5.11.0"
+    "redis": "^5.11.0",
+    "sanitize-html": "^2.13.0",
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2",
+    "xlsx": "^0.18.5"
   }
 }

@@ -1,14 +1,16 @@
 const rateLimit = require("express-rate-limit");
 const { makeStore } = require("../config/redis");
 const { getClientKey } = require("../middleware/getClientKey");
+const { getClientIp } = require("../lib/ipExtraction");
 
 const blockTime = 15 * 60 * 1000;
-const ipKey = (req) => rateLimit.ipKeyGenerator(req.ip);
+
+const ipKey = (req) => rateLimit.ipKeyGenerator(getClientIp(req));
 
 const authLimiter = rateLimit({
   windowMs: blockTime,
   max: 200,
-  keyGenerator: (req) => `auth:${req.user?.userId ?? ipKey(req)}`,
+  keyGenerator: (req) => `auth:${req.user?._id ?? ipKey(req)}`,
   store: makeStore("rl:auth:"),
   message: { success: false, message: "Too many requests, slow down." },
   standardHeaders: true,
@@ -86,7 +88,7 @@ const guestLimiter = rateLimit({
 const ipCeilingLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 30,
-  skip: (req) => req.ip === process.env.UNIVERSITY_PUBLIC_IP,
+  skip: (req) => getClientIp(req) === process.env.UNIVERSITY_PUBLIC_IP,
   keyGenerator: (req) => `ip-ceiling:${ipKey(req)}`,
   store: makeStore("rl:ip-ceiling:"),
   message: { success: false, message: "Too many requests from this network." },

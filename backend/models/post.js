@@ -70,7 +70,8 @@ const postSchema = Schema(
     department: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "departments",
-      required: true,
+      required: false,
+      default: null,
     },
 
     status: {
@@ -115,6 +116,12 @@ const postSchema = Schema(
     ],
 
     commentCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    likeCount: {
       type: Number,
       default: 0,
       min: 0,

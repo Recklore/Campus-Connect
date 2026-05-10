@@ -18,13 +18,13 @@ const {
   verfiyAndDeleteToken,
 } = require("../services/verificationToken");
 const { redisClient } = require("../config/redis");
-const universityDb = require("../university_data.json");
 
 const FRONTEND_BASE_URL =
   process.env.FRONTEND_BASE_URL || "http://localhost:5173";
 const SIGNUP_RESEND_COOLDOWN_SECONDS = 30;
 const SIGNUP_RESEND_COOLDOWN_PREFIX = "signup:resend:cooldown:";
 const AUTH_COOKIE_NAME = "campus_connect_token";
+const REFRESH_COOKIE_NAME = "campus_connect_refresh";
 
 const getCookieBaseOptions = () => {
   const isProd = process.env.NODE_ENV === "production";
@@ -39,7 +39,14 @@ const getCookieBaseOptions = () => {
 const setAuthCookie = (res, token) => {
   res.cookie(AUTH_COOKIE_NAME, token, {
     ...getCookieBaseOptions(),
-    maxAge: 60 * 60 * 1000,
+    maxAge: 15 * 60 * 1000, // 15 minutes
+  });
+};
+
+const setRefreshCookie = (res, token) => {
+  res.cookie(REFRESH_COOKIE_NAME, token, {
+    ...getCookieBaseOptions(),
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
 
@@ -47,15 +54,9 @@ const clearAuthCookie = (res) => {
   res.clearCookie(AUTH_COOKIE_NAME, getCookieBaseOptions());
 };
 
-const findStudentInUniDb = (enrollmentNumber) =>
-  universityDb.students.find(
-    (s) => s.enrollmentNumber.toUpperCase() === enrollmentNumber.toUpperCase(),
-  ) || null;
-
-const findSeniorInUniDb = (email) =>
-  universityDb.seniors.find(
-    (s) => s.emailId.toLowerCase() === email.toLowerCase(),
-  ) || null;
+const clearRefreshCookie = (res) => {
+  res.clearCookie(REFRESH_COOKIE_NAME, getCookieBaseOptions());
+};
 
 const guestLogin = (req, res) => {
   const jwtToken = jwt.sign(
@@ -71,9 +72,9 @@ const login = async (req, res) => {
   try {
     const resMessage = "Invalid credentials";
     const { role, password } = req.body;
-
+    
     let emailId;
-
+    
     if (!role) {
       return res.status(400).json({ message: "Bad request", success: false });
     } else if (role === "student") {
@@ -84,26 +85,45 @@ const login = async (req, res) => {
     } else {
       return res.status(400).json({ message: "Bad request", success: false });
     }
+    
     const user = await userModel.findOne({ emailId });
-
     if (!user) {
       await bcrypt.compare(password, "polkadots");
       return res.status(401).json({ message: resMessage, success: false });
     }
-
+    
     const isPassCorrect = await bcrypt.compare(password, user.passwordHash);
 
-    if (!isPassCorrect) {
+    if (!isPassCorrect || !user.isActive) {
       return res.status(401).json({ message: resMessage, success: false });
     }
 
-    const jwtToken = jwt.sign(
+    // Generate access token (15 minutes)
+    const accessToken = jwt.sign(
       { emailId: user.emailId, _id: user._id, role: user.role },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: 3600 },
+      { expiresIn: 900 }, // 15 minutes
     );
 
-    setAuthCookie(res, jwtToken);
+    // Generate refresh token (7 days)
+    const refreshToken = jwt.sign(
+      { emailId: user.emailId, _id: user._id },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: 604800 }, // 7 days
+    );
+
+    // Hash and store refresh token
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    
+    await userModel.findByIdAndUpdate(user._id, {
+      refreshTokenHash,
+      refreshTokenExpiresAt,
+      lastLoginAt: new Date(),
+    });
+
+    setAuthCookie(res, accessToken);
+    setRefreshCookie(res, refreshToken);
 
     return res.status(200).json({
       message: "Login successful",
@@ -117,8 +137,24 @@ const login = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-  clearAuthCookie(res);
-  return res.status(200).json({ success: true, message: "Logged out" });
+  try {
+    if (req.user && req.user._id) {
+      await userModel.findByIdAndUpdate(req.user._id, {
+        refreshTokenHash: null,
+        refreshTokenExpiresAt: null,
+      });
+    }
+    
+    clearAuthCookie(res);
+    clearRefreshCookie(res);
+    
+    return res.status(200).json({ success: true, message: "Logged out" });
+  } catch (err) {
+    clearAuthCookie(res);
+    clearRefreshCookie(res);
+    
+    return res.status(200).json({ success: true, message: "Logged out" });
+  }
 };
 
 const signupInit = async (req, res) => {
@@ -127,17 +163,14 @@ const signupInit = async (req, res) => {
     const { role, password } = req.body;
 
     let emailId;
-    let uniRecord;
 
     if (!role) {
       return res.status(400).json({ message: "Bad request", success: false });
     } else if (role === "student") {
       const { enrollmentNumber } = req.body;
       emailId = enrollmentNumber.toLowerCase() + "@curaj.ac.in";
-      uniRecord = findStudentInUniDb(enrollmentNumber);
     } else if (role === "senior") {
       emailId = req.body.emailId?.toLowerCase();
-      uniRecord = findSeniorInUniDb(emailId);
     } else {
       return res.status(400).json({ message: "Bad request", success: false });
     }
@@ -146,20 +179,21 @@ const signupInit = async (req, res) => {
     const user = await userModel.findOne({ emailId });
     const verficationToken = generateToken();
 
-    if (user) {
+    if (!user) {
+      sendVerificationMail(emailId, notInRecordsTemplate(emailId));
+      return res.status(202).json({ message: resMessage, success: true });
+    }
+
+    if (user.isActive) {
       sendVerificationMail(
         emailId,
         alreadyRegisteredTemplate(emailId, `${FRONTEND_BASE_URL}/auth/login`),
       );
       return res.status(202).json({ message: resMessage, success: true });
-    } else if (!uniRecord) {
-      sendVerificationMail(emailId, notInRecordsTemplate(emailId));
-      return res.status(202).json({ message: resMessage, success: true });
     } else {
       const userPayload = {
-        userData: uniRecord,
+        userEmailId: user.emailId,
         passwordHash,
-        role,
         createdAt: Date.now(),
       };
       await storeSignupPendingToken({
@@ -189,17 +223,14 @@ const signupResend = async (req, res) => {
     const { role } = req.body;
 
     let emailId;
-    let uniRecord;
 
     if (!role) {
       return res.status(400).json({ message: "Bad request", success: false });
     } else if (role === "student") {
       const { enrollmentNumber } = req.body;
       emailId = enrollmentNumber.toLowerCase() + "@curaj.ac.in";
-      uniRecord = findStudentInUniDb(enrollmentNumber);
     } else if (role === "senior") {
       emailId = req.body.emailId?.toLowerCase();
-      uniRecord = findSeniorInUniDb(emailId);
     } else {
       return res.status(400).json({ message: "Bad request", success: false });
     }
@@ -213,19 +244,19 @@ const signupResend = async (req, res) => {
 
     const user = await userModel.findOne({ emailId });
 
-    if (user) {
-      sendVerificationMail(
-        emailId,
-        alreadyRegisteredTemplate(emailId, `${FRONTEND_BASE_URL}/auth/login`),
-      );
+    if (!user) {
+      sendVerificationMail(emailId, notInRecordsTemplate(emailId));
       await redisClient.set(cooldownKey, "1", {
         EX: SIGNUP_RESEND_COOLDOWN_SECONDS,
       });
       return res.status(202).json({ message: resMessage, success: true });
     }
 
-    if (!uniRecord) {
-      sendVerificationMail(emailId, notInRecordsTemplate(emailId));
+    if (user.isActive) {
+      sendVerificationMail(
+        emailId,
+        alreadyRegisteredTemplate(emailId, `${FRONTEND_BASE_URL}/auth/login`),
+      );
       await redisClient.set(cooldownKey, "1", {
         EX: SIGNUP_RESEND_COOLDOWN_SECONDS,
       });
@@ -274,10 +305,24 @@ const signupVerify = async (req, res) => {
         .json({ message: "Invalid or expired token", success: false });
     }
 
-    const { passwordHash, userData, role } = parsedPayload;
+    const { passwordHash, userEmailId, userData } = parsedPayload;
+    const emailId = userEmailId || userData?.emailId;
 
-    const existingUser = await userModel.findOne({ emailId: userData.emailId });
-    if (existingUser) {
+    if (!emailId || !passwordHash) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired token", success: false });
+    }
+
+    const existingUser = await userModel.findOne({ emailId });
+
+    if (!existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired token", success: false });
+    }
+
+    if (existingUser.isActive) {
       return res
         .status(200)
         .json({
@@ -286,39 +331,16 @@ const signupVerify = async (req, res) => {
         });
     }
 
-    const createPayload = {
-      name: userData.name,
-      emailId: userData.emailId,
-      passwordHash,
-      role,
-      department: userData.department,
-    };
-
-    if (role === "student") {
-      createPayload.dob = new Date(userData.dob);
-      createPayload.enrollmentNumber = userData.enrollmentNumber;
-    } else if (role === "senior") {
-      createPayload.employeeId = userData.employeeId;
-      createPayload.designation = userData.designation;
-    } else {
-      return res
-        .status(500)
-        .json({ message: "Internal Server Error", success: false });
-    }
-
-    try {
-      await userModel.create(createPayload);
-    } catch (createErr) {
-      if (createErr?.code === 11000) {
-        return res
-          .status(200)
-          .json({
-            message: "User already verified. Please log in.",
-            success: true,
-          });
-      }
-      throw createErr;
-    }
+    await userModel.updateOne(
+      { emailId },
+      {
+        $set: {
+          passwordHash,
+          isActive: true,
+        },
+      },
+      { new: true },
+    );
 
     return res
       .status(200)
@@ -429,10 +451,102 @@ const forgotPasswordVerify = async (req, res) => {
   }
 };
 
+const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
+
+    if (!refreshToken) {
+      clearAuthCookie(res);
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Refresh token not found", success: false });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_KEY);
+    } catch (err) {
+      clearAuthCookie(res);
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Invalid or expired refresh token", success: false });
+    }
+
+    const user = await userModel.findById(decoded._id);
+
+    if (!user || !user.refreshTokenHash) {
+      clearAuthCookie(res);
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "User not found or session expired", success: false });
+    }
+
+    // Verify stored refresh token hash
+    const isRefreshTokenValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+
+    if (!isRefreshTokenValid) {
+      // Potential token theft - clear all sessions
+      await userModel.findByIdAndUpdate(user._id, {
+        refreshTokenHash: null,
+        refreshTokenExpiresAt: null,
+      });
+      clearAuthCookie(res);
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Invalid refresh token", success: false });
+    }
+
+    // Check if refresh token is expired
+    if (new Date() > user.refreshTokenExpiresAt) {
+      clearAuthCookie(res);
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Refresh token expired", success: false });
+    }
+
+    // Generate new access token
+    const newAccessToken = jwt.sign(
+      { emailId: user.emailId, _id: user._id, role: user.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: 900 }, // 15 minutes
+    );
+
+    // Optionally generate new refresh token if expiring soon (less than 1 day left)
+    let newRefreshToken = null;
+    const daysLeft = (user.refreshTokenExpiresAt - new Date()) / (24 * 60 * 60 * 1000);
+    
+    if (daysLeft < 1) {
+      newRefreshToken = jwt.sign(
+        { emailId: user.emailId, _id: user._id },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: 604800 }, // 7 days
+      );
+      const newRefreshTokenHash = await bcrypt.hash(newRefreshToken, 10);
+      const newRefreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      
+      await userModel.findByIdAndUpdate(user._id, {
+        refreshTokenHash: newRefreshTokenHash,
+        refreshTokenExpiresAt: newRefreshTokenExpiresAt,
+      });
+
+      setRefreshCookie(res, newRefreshToken);
+    }
+
+    setAuthCookie(res, newAccessToken);
+
+    return res.status(200).json({
+      message: "Token refreshed successfully",
+      success: true,
+    });
+  } catch (err) {
+    clearAuthCookie(res);
+    clearRefreshCookie(res);
+    return res
+      .status(500)
+      .json({ message: `Internal Server Error ${err}`, success: false });
+  }
+};
+
 module.exports = {
   login,
   guestLogin,
   logout,
+  refreshAccessToken,
   signupInit,
   signupResend,
   signupVerify,

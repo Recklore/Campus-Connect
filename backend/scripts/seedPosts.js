@@ -148,6 +148,7 @@ const seedPosts = async () => {
             department: department._id,
             objections: [],
             commentCount: 0,
+            likeCount: 0,
           },
         },
         upsert: true,

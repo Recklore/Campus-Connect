@@ -15,7 +15,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
       minLength: 2,
-      maxLength: 20,
+      maxLength: 50,
       trim: true,
     },
 
@@ -79,7 +79,7 @@ const userSchema = new Schema(
       sparse: true,
       unique: true,
       uppercase: true,
-      minLength: 8,
+      minLength: 7,
       maxLength: 14,
       trim: true,
     },
@@ -116,6 +116,21 @@ const userSchema = new Schema(
       trim: true,
     },
 
+    refreshTokenHash: {
+      type: String,
+      default: null,
+    },
+
+    refreshTokenExpiresAt: {
+      type: Date,
+      default: null,
+    },
+
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -127,6 +142,9 @@ const userSchema = new Schema(
 userSchema.index({ role: 1 });
 userSchema.index({ department: 1 });
 userSchema.index({ adminOf: 1 });
+userSchema.index({ name: 1 });
+userSchema.index({ enrollmentNumber: 1 });
+userSchema.index({ employeeId: 1 });
 
 userSchema.pre("save", function () {
   this.roleLevel = ROLE_LEVELS[this.role] ?? 0;

@@ -222,10 +222,52 @@ const forgotPasswordResetLinkTemplate = (resetUrl) => {
   return { subject, html };
 };
 
+const postDeletedByAdminTemplate = ({ authorName, postTitle, adminName }) => {
+  const subject = "Your post was removed by an admin";
+  const html = renderEmailLayout({
+    title: "Post removed by admin",
+    intro: `Hello ${authorName || "User"}, your post was removed by an administrator.`,
+    content: `
+      <p style="margin:0 0 12px;color:${BRAND.colors.text};font-size:15px;line-height:1.55;">
+        <strong>Post title:</strong> ${escapeHtml(postTitle || "Untitled post")}
+      </p>
+      <p style="margin:0;color:${BRAND.colors.muted};font-size:14px;line-height:1.55;">
+        <strong>Actioned by:</strong> ${escapeHtml(adminName || "Administrator")}
+      </p>
+    `,
+    note: "If you believe this was a mistake, please contact your department or university admin.",
+  });
+
+  return { subject, html };
+};
+
+const discussionDeletedByAdminTemplate = ({ authorName, discussionTitle, adminName }) => {
+  const subject = "Your discussion was removed by an admin";
+  const html = renderEmailLayout({
+    title: "Discussion removed by admin",
+    intro: `Hello ${authorName || "User"}, your discussion was removed by an administrator.`,
+    content: `
+      <p style="margin:0 0 12px;color:${BRAND.colors.text};font-size:15px;line-height:1.55;">
+        <strong>Discussion title:</strong> ${escapeHtml(discussionTitle || "Untitled discussion")}
+      </p>
+      <p style="margin:0;color:${BRAND.colors.muted};font-size:14px;line-height:1.55;">
+        <strong>Actioned by:</strong> ${escapeHtml(adminName || "Administrator")}
+      </p>
+    `,
+    note: "If you believe this was a mistake, please contact your department or university admin.",
+  });
+
+  return { subject, html };
+};
+
 module.exports = {
+  renderEmailLayout,
+  escapeHtml,
   verifyEmailTemplate,
   alreadyRegisteredTemplate,
   notInRecordsTemplate,
   forgotPasswordNotRegisteredTemplate,
   forgotPasswordResetLinkTemplate,
+  postDeletedByAdminTemplate,
+  discussionDeletedByAdminTemplate,
 };

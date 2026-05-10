@@ -1,5 +1,7 @@
 const { departmentModel } = require("../models/department");
 const { subscriptionModel } = require("../models/subscription");
+const { postModel } = require("../models/post");
+const mongoose = require("mongoose");
 
 const getAllDepartments = async (req, res) => {
   try {
@@ -24,8 +26,8 @@ const getAllDepartments = async (req, res) => {
 
 const toggleSubscription = async (req, res) => {
   try {
-    const userId = req.user._id;
-    if (!userId) {
+    const userObjectId = req.user._id;
+    if (!userObjectId) {
       return res.status(403).json({ success: false, message: "forbidden" });
     }
 
@@ -39,7 +41,7 @@ const toggleSubscription = async (req, res) => {
     }
 
     const existing = await subscriptionModel.findOne({
-      user: userId,
+      user: userObjectId,
       department: deptId,
     });
 
@@ -51,7 +53,7 @@ const toggleSubscription = async (req, res) => {
       return res.status(200).json({ success: true, subscribed: false });
     } else {
       await subscriptionModel.create({
-        user: userId,
+        user: userObjectId,
         department: deptId,
       });
       await departmentModel.findByIdAndUpdate(deptId, {
@@ -74,7 +76,7 @@ const getMySubscription = async (req, res) => {
 
     const subscriptions = await subscriptionModel
       .find({ user: req.user._id })
-      .populate("department", "deptName deptCode school displayImage")
+      .populate("department", "deptName deptCode school displayImage subscriberCount")
       .sort({ createdAt: -1 });
 
     const departments = subscriptions.map((s) => s.department);
@@ -86,4 +88,38 @@ const getMySubscription = async (req, res) => {
   }
 };
 
-module.exports = { getAllDepartments, toggleSubscription, getMySubscription };
+const getDepartmentById = async (req, res) => {
+  try {
+    const deptId = String(req.params?.id || "").trim();
+    if (!mongoose.Types.ObjectId.isValid(deptId)) {
+      return res.status(400).json({ success: false, message: "invalid department id" });
+    }
+
+    const department = await departmentModel
+      .findOne({ _id: deptId, isActive: true })
+      .select("deptName deptCode description subscriberCount school displayImage")
+      .lean();
+
+    if (!department) {
+      return res.status(404).json({ success: false, message: "department not found" });
+    }
+
+    const postCount = await postModel.countDocuments({
+      department: department._id,
+      isVisible: true,
+      status: { $in: ["approved", "auto_approved"] },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        ...department,
+        postCount,
+      },
+    });
+  } catch {
+    return res.status(500).json({ success: false, message: "internal server error" });
+  }
+};
+
+module.exports = { getAllDepartments, toggleSubscription, getMySubscription, getDepartmentById };

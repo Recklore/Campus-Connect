@@ -1,7 +1,9 @@
 const multer = require("multer");
+const crypto = require("crypto");
 
 const ALLOWED_TYPES = [
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
   "application/pdf",
@@ -28,6 +30,26 @@ const upload = multer({
     files: MAX_FILE_COUNT,
   },
 });
+
+const computeChecksum = (buffer) => {
+  return crypto.createHash("sha256").update(buffer).digest("hex");
+};
+
+const addChecksumToFiles = (req, res, next) => {
+  if (req.files) {
+    req.files = req.files.map((file) => ({
+      ...file,
+      checksum: computeChecksum(file.buffer),
+    }));
+  }
+  if (req.file) {
+    req.file = {
+      ...req.file,
+      checksum: computeChecksum(req.file.buffer),
+    };
+  }
+  next();
+};
 
 const handleUploadError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
@@ -56,4 +78,4 @@ const handleUploadError = (err, req, res, next) => {
   next(err);
 };
 
-module.exports = { upload, handleUploadError };
+module.exports = { upload, handleUploadError, addChecksumToFiles };

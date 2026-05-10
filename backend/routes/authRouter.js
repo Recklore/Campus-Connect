@@ -3,6 +3,7 @@ const {
   login,
   guestLogin,
   logout,
+  refreshAccessToken,
   signupInit,
   signupResend,
   signupVerify,
@@ -27,6 +28,7 @@ const {
 authRouter.post("/login", loginLimiter, loginRules, login);
 authRouter.post("/guestLogin", guestLimiter, guestLogin);
 authRouter.post("/logout", guestLimiter, logout);
+authRouter.post("/refresh", guestLimiter, refreshAccessToken);
 
 authRouter.post(
   "/signup",

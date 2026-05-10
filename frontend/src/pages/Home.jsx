@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import deptFallbackImage from "../assets/curaj.jpg";
-import Brand from "../components/common/Brand";
-import { departmentApi } from "../lib/api";
+import AuthenticatedHeader from "../components/common/AuthenticatedHeader";
+import { departmentApi, userApi } from "../lib/api";
 import { logoutSession } from "../lib/authSession";
 
 function Home() {
@@ -13,7 +13,7 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [busyDepartmentId, setBusyDepartmentId] = useState("");
   const [status, setStatus] = useState("");
-  const [hideHeader, setHideHeader] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   const totalDepartments = useMemo(
     () => Object.values(departmentsBySchool).reduce((sum, items) => sum + items.length, 0),
@@ -36,8 +36,13 @@ function Home() {
     setStatus("");
 
     try {
-      const departmentsResponse = await departmentApi.getAll();
-      setDepartmentsBySchool(departmentsResponse.data?.data || {});
+      const [userResponse, departmentResponse] = await Promise.all([
+        userApi.getMe(),
+        departmentApi.getAll(),
+      ]);
+
+      setUserProfile(userResponse.data?.data || null);
+      setDepartmentsBySchool(departmentResponse.data?.data || {});
 
       try {
         const subscriptionsResponse = await departmentApi.getSubscriptions();
@@ -70,27 +75,6 @@ function Home() {
     loadDashboard();
   }, [loadDashboard]);
 
-  useEffect(() => {
-    let lastScrollY = window.scrollY;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY <= 20) {
-        setHideHeader(false);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 96) {
-        setHideHeader(true);
-      } else if (currentScrollY < lastScrollY) {
-        setHideHeader(false);
-      }
-
-      lastScrollY = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const handleToggleSubscription = async (departmentId) => {
     if (!canManageSubscriptions || busyDepartmentId) {
       return;
@@ -99,7 +83,8 @@ function Home() {
     setBusyDepartmentId(departmentId);
     setStatus("");
     try {
-      const response = await departmentApi.toggleSubscription(departmentId);
+      const action = subscriptionIds.includes(departmentId) ? "unsubscribe" : "subscribe";
+      const response = await departmentApi.toggleSubscription(departmentId, action);
       const isSubscribed = Boolean(response.data?.subscribed);
 
       setSubscriptionIds((prev) => {
@@ -138,34 +123,9 @@ function Home() {
     }
   };
 
-  const handleLogout = async () => {
-    await logoutSession();
-    navigate("/auth/login", { replace: true });
-  };
-
   return (
     <main className="home-shell">
-      <header className={`landing-topbar feed-page-topbar ${hideHeader ? "is-hidden" : ""}`}>
-        <div className="landing-topbar-inner">
-          <Brand />
-          <div className="landing-top-actions" aria-label="Department actions">
-            <button
-              type="button"
-              className="landing-link secondary feed-header-btn"
-              onClick={() => navigate("/app")}
-            >
-              Feed
-            </button>
-            <button
-              type="button"
-              className="landing-link feed-header-btn feed-header-logout"
-              onClick={handleLogout}
-            >
-              Log out
-            </button>
-          </div>
-        </div>
-      </header>
+      <AuthenticatedHeader userProfile={userProfile} hideOnScroll={false} />
 
       <section className="home-content-wrap">
         <div className="home-headline">
@@ -223,20 +183,29 @@ function Home() {
 
                     <div className="dept-actions">
                       <span>{department.subscriberCount || 0} subscribers</span>
-                      <button
-                        type="button"
-                        className={isSubscribed ? "dept-toggle subscribed" : "dept-toggle"}
-                        onClick={() => handleToggleSubscription(department._id)}
-                        disabled={buttonDisabled}
-                      >
-                        {isBusy
-                          ? "Updating..."
-                          : !canManageSubscriptions
-                            ? "Guest session"
-                            : isSubscribed
-                              ? "Subscribed"
-                              : "Subscribe"}
-                      </button>
+                      <div className="dept-action-buttons">
+                        <button
+                          type="button"
+                          className={isSubscribed ? "dept-toggle subscribed" : "dept-toggle"}
+                          onClick={() => handleToggleSubscription(department._id)}
+                          disabled={buttonDisabled}
+                        >
+                          {isBusy
+                            ? "Updating..."
+                            : !canManageSubscriptions
+                              ? "Guest session"
+                              : isSubscribed
+                                ? "Subscribed"
+                                : "Subscribe"}
+                        </button>
+                        <button
+                          type="button"
+                          className="dept-toggle secondary"
+                          onClick={() => navigate(`/app/departments/${department._id}/posts`)}
+                        >
+                          View posts
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </article>

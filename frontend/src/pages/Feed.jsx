@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import avatarImage from "../assets/curaj.jpg";
-import Brand from "../components/common/Brand";
-import { postApi } from "../lib/api";
-import { logoutSession } from "../lib/authSession";
+import AuthenticatedHeader from "../components/common/AuthenticatedHeader";
+import { postApi, userApi } from "../lib/api";
 
 const FEED_SCOPE = {
   GENERAL: "general",
   PERSONAL: "personal",
+  REVIEW: "review",
 };
 
 function LikeIcon() {
@@ -65,15 +65,14 @@ function Feed() {
   const [posts, setPosts] = useState([]);
   const [activeScope, setActiveScope] = useState(FEED_SCOPE.GENERAL);
   const [canSwitchScope, setCanSwitchScope] = useState(false);
+  const [canReviewScope, setCanReviewScope] = useState(false);
   const [hasSubscriptions, setHasSubscriptions] = useState(true);
   const [nextCursor, setNextCursor] = useState(null);
   const [attachmentIndexByPost, setAttachmentIndexByPost] = useState({});
-  const [likedPostIds, setLikedPostIds] = useState({});
-  const [commentTapByPost, setCommentTapByPost] = useState({});
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [status, setStatus] = useState("");
-  const [hideTopUi, setHideTopUi] = useState(false);
 
   const loadFeed = useCallback(
     async ({ reset = false, scope, cursor } = {}) => {
@@ -98,12 +97,11 @@ function Feed() {
         setNextCursor(payload.nextCursor || null);
         setActiveScope(payload.feedScope || FEED_SCOPE.GENERAL);
         setCanSwitchScope(Boolean(payload.canSwitchScope));
+        setCanReviewScope(Boolean(payload.canReviewScope));
         setHasSubscriptions(payload.hasSubscriptions !== false);
 
         if (reset) {
           setAttachmentIndexByPost({});
-          setLikedPostIds({});
-          setCommentTapByPost({});
         }
       } catch (error) {
         if (error.status === 401) {
@@ -124,25 +122,21 @@ function Feed() {
   }, [loadFeed]);
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY <= 20) {
-        setHideTopUi(false);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 96) {
-        setHideTopUi(true);
-      } else if (currentScrollY < lastScrollY) {
-        setHideTopUi(false);
+    const loadProfile = async () => {
+      try {
+        const response = await userApi.getMe();
+        setUserProfile(response.data?.data || null);
+      } catch (error) {
+        if (error.status === 401) {
+          setUserProfile(null);
+        }
       }
-
-      lastScrollY = currentScrollY;
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    loadProfile();
   }, []);
+
+
 
   const handleSwitchScope = async (scope) => {
     if (scope === activeScope || loading) {
@@ -165,18 +159,30 @@ function Feed() {
     navigate("/auth/login", { replace: true });
   };
 
-  const handleLikeToggle = (postId) => {
-    setLikedPostIds((prev) => ({
-      ...prev,
-      [postId]: !prev[postId],
-    }));
-  };
+  const handleLikeToggle = async (postId) => {
+    try {
+      const response = await postApi.toggleLike(postId);
+      const liked = Boolean(response.data?.liked);
+      const likeCount = Number(response.data?.likeCount || 0);
 
-  const handleCommentTap = (postId) => {
-    setCommentTapByPost((prev) => ({
-      ...prev,
-      [postId]: (prev[postId] || 0) + 1,
-    }));
+      setPosts((prev) =>
+        prev.map((post) =>
+          post._id === postId
+            ? {
+                ...post,
+                likedByUser: liked,
+                likeCount,
+              }
+            : post,
+        ),
+      );
+    } catch (error) {
+      if (error.status === 401) {
+        navigate("/auth/login", { replace: true });
+        return;
+      }
+      setStatus(error.message || "Unable to update like right now");
+    }
   };
 
   const shiftAttachment = (postId, direction, total) => {
@@ -195,6 +201,10 @@ function Feed() {
   };
 
   const emptyMessage = useMemo(() => {
+    if (activeScope === FEED_SCOPE.REVIEW) {
+      return "No posts are currently under review.";
+    }
+
     if (activeScope === FEED_SCOPE.PERSONAL && !hasSubscriptions) {
       return "You are not subscribed to any departments yet. Visit Departments to personalize your feed.";
     }
@@ -204,30 +214,10 @@ function Feed() {
 
   return (
     <main className="feed-shell">
-      <header className={`landing-topbar feed-page-topbar ${hideTopUi ? "is-hidden" : ""}`}>
-        <div className="landing-topbar-inner">
-          <Brand />
-          <div className="landing-top-actions" aria-label="Feed actions">
-            <button
-              type="button"
-              className="landing-link secondary feed-header-btn"
-              onClick={() => navigate("/app/departments")}
-            >
-              Departments
-            </button>
-            <button
-              type="button"
-              className="landing-link feed-header-btn feed-header-logout"
-              onClick={handleLogout}
-            >
-              Log out
-            </button>
-          </div>
-        </div>
-      </header>
+      <AuthenticatedHeader userProfile={userProfile} hideOnScroll={true} />
 
-      {canSwitchScope ? (
-        <div className={`feed-scope-rail ${hideTopUi ? "is-hidden" : ""}`}>
+      {canSwitchScope || canReviewScope ? (
+        <div className="feed-scope-rail">
           <div className="feed-scope-switch" role="tablist" aria-label="Feed scope">
             <button
               type="button"
@@ -245,6 +235,16 @@ function Feed() {
             >
               General
             </button>
+            {canReviewScope ? (
+              <button
+                type="button"
+                className={`feed-scope-btn ${activeScope === FEED_SCOPE.REVIEW ? "active" : ""}`}
+                onClick={() => handleSwitchScope(FEED_SCOPE.REVIEW)}
+                disabled={loading}
+              >
+                Review
+              </button>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -265,10 +265,9 @@ function Feed() {
               Math.max(0, totalAttachments - 1),
             );
             const activeAttachment = attachments[activeAttachmentIndex] || null;
-            const liked = Boolean(likedPostIds[post._id]);
-            const baseLikeCount = Number(post.likeCount || 0);
-            const likeCount = baseLikeCount + (liked ? 1 : 0);
-            const commentCount = Number(post.commentCount || 0) + Number(commentTapByPost[post._id] || 0);
+            const liked = Boolean(post.likedByUser);
+            const likeCount = Number(post.likeCount || 0);
+            const commentCount = Number(post.commentCount || 0);
 
             return (
               <article className="feed-post-card" key={post._id}>
@@ -292,6 +291,7 @@ function Feed() {
                 </div>
 
                 <h2>{post.title || "Official update"}</h2>
+                <span className="post-status">{post.status?.replace(/_/g, " ") || "official"}</span>
                 <p className="feed-post-body">{post.body || "No details available."}</p>
 
                 <section className="feed-attachment-box">
@@ -369,13 +369,22 @@ function Feed() {
                   <button
                     type="button"
                     className="feed-action-btn"
-                    onClick={() => handleCommentTap(post._id)}
+                    onClick={() => navigate(`/app/posts/${post._id}`)}
                   >
                     <span className="feed-action-main">
                       <CommentIcon />
                       <span>Comment</span>
                     </span>
                     <span className="feed-action-count">{commentCount}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="feed-action-btn"
+                    onClick={() => navigate(`/app/posts/${post._id}`)}
+                  >
+                    <span className="feed-action-main">
+                      <span>View</span>
+                    </span>
                   </button>
                 </div>
               </article>
