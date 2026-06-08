@@ -13,7 +13,17 @@ const notificationSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["POST_APPROVED", "POST_REJECTED", "OBJECTION_RAISED", "OBJECTION_RESOLVED"],
+      enum: [
+        "POST_APPROVED",
+        "POST_REJECTED",
+        "OBJECTION_RAISED",
+        "OBJECTION_RESOLVED",
+        "CONTENT_APPROVED",
+        "CONTENT_REJECTED",
+        "CONTENT_RESTORED",
+        "CONTENT_FLAGGED",
+        "DISCUSSION_REPLY",
+      ],
     },
 
     title: {

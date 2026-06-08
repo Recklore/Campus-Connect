@@ -143,8 +143,6 @@ userSchema.index({ role: 1 });
 userSchema.index({ department: 1 });
 userSchema.index({ adminOf: 1 });
 userSchema.index({ name: 1 });
-userSchema.index({ enrollmentNumber: 1 });
-userSchema.index({ employeeId: 1 });
 
 userSchema.pre("save", function () {
   this.roleLevel = ROLE_LEVELS[this.role] ?? 0;

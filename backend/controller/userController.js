@@ -91,6 +91,28 @@ const getDepartmentForUser = async (user) => {
 const getMe = async (req, res) => {
   try {
     const userObjectId = req.user?._id || null;
+    const isGuestSession = req.user?.role === "guest" && !userObjectId;
+
+    if (isGuestSession) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          _id: null,
+          name: "Guest",
+          role: "guest",
+          roleLevel: 0,
+          designation: null,
+          department: null,
+          emailId: null,
+          enrollmentNumber: null,
+          employeeId: null,
+          subscriptionCount: 0,
+          departmentSubscriberCount: null,
+          departmentInfo: null,
+        },
+      });
+    }
+
     if (!userObjectId) {
       return res.status(401).json({ success: false, message: "unauthorised" });
     }
